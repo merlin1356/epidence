@@ -1,265 +1,383 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="올인스페이스"/>
-  <meta name="theme-color" content="#2c3e50"/>
-  <link rel="manifest" href="#" id="manifest-placeholder"/>
-  <title>올인스페이스</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    body{font-family:'Apple SD Gothic Neo','Malgun Gothic',Arial,sans-serif;background:#f0f2f5;overflow-x:hidden;}
-    input,select,button,textarea{font-family:inherit;}
-    button{cursor:pointer;}
-    ::-webkit-scrollbar{width:4px;}
-    ::-webkit-scrollbar-thumb{background:#bdc3c7;border-radius:2px;}
-    #mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#2c3e50;z-index:500;padding:6px 0 max(6px,env(safe-area-inset-bottom));border-top:1px solid #34495e;}
-    .mob-btn{flex:1;display:flex;flex-direction:column;align-items:center;background:none;border:none;color:#95a5a6;padding:6px 2px;font-size:10px;gap:3px;transition:color 0.2s;}
-    .mob-btn span:first-child{font-size:20px;line-height:1;}
-    .mob-btn.active{color:#3498db;}
-    @media(max-width:768px){
-      #sidebar{display:none!important;}
-      #main{margin-left:0!important;padding:14px!important;padding-bottom:90px!important;}
-      #mob-nav{display:flex!important;}
-      .stat-grid{grid-template-columns:repeat(2,1fr)!important;}
-      .modal-inner{width:100%!important;max-width:100%!important;border-radius:20px 20px 0 0!important;position:fixed!important;bottom:0!important;margin:0!important;max-height:94vh!important;}
-      .modal-wrap{align-items:flex-end!important;padding:0!important;}
-      h2{font-size:20px!important;}
-    }
-    @media(min-width:769px){#mob-nav{display:none!important;}}
-    .btn{border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:opacity 0.2s;}
-    .btn:hover{opacity:0.85;}
-    .btn:active{opacity:0.7;}
-    .card{background:white;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
-    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2c3e50,#3498db);padding:20px;}
-    .login-box{background:white;border-radius:24px;padding:40px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-    .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0;}
-    .pin-btn{padding:18px;font-size:22px;font-weight:bold;background:#f8f9fa;border:2px solid #ecf0f1;border-radius:12px;cursor:pointer;transition:all 0.15s;color:#2c3e50;}
-    .pin-btn:active{background:#3498db;color:white;transform:scale(0.95);}
-    /* 수납 탭 스타일 */
-    .pay-tab{padding:8px 18px;border:2px solid #ddd;border-radius:20px;background:white;font-size:14px;font-weight:bold;color:#7f8c8d;cursor:pointer;transition:all 0.2s;}
-    .pay-tab.active{background:#27ae60;border-color:#27ae60;color:white;}
-    .pay-btn-unpaid{background:#ecf0f1;color:#7f8c8d;border:2px dashed #bdc3c7;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:bold;width:100%;cursor:pointer;transition:all 0.2s;}
-    .pay-btn-unpaid:hover{background:#d5f5e3;border-color:#27ae60;color:#27ae60;}
-    .pay-btn-paid{background:#d5f5e3;color:#27ae60;border:2px solid #27ae60;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:bold;width:100%;cursor:pointer;}
-    .pay-btn-cancel{background:#fdeaea;color:#e74c3c;border:2px solid #e74c3c;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;margin-top:3px;width:100%;}
-    .month-row{display:grid;grid-template-columns:60px 1fr 1fr 1fr;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid #f0f0f0;}
-    .month-row:last-child{border-bottom:none;}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2c3e50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="EPIDENCE">
+  <title>EPIDENCE 올인스페이스 | 임대관리시스템</title>
 </head>
 <body>
-<div id="root"></div>
-<script>
-  const manifest={name:"올인스페이스 임대관리",short_name:"올인스페이스",start_url:window.location.href,display:"standalone",background_color:"#2c3e50",theme_color:"#2c3e50",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232c3e50'/><text y='.9em' font-size='70' x='15'>🏢</text></svg>",sizes:"512x512",type:"image/svg+xml"}]};
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  document.getElementById('manifest-placeholder').href=URL.createObjectURL(blob);
-  if('serviceWorker' in navigator){const sw=`const C='v1';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['/']))));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));`;const swb=new Blob([sw],{type:'text/javascript'});navigator.serviceWorker.register(URL.createObjectURL(swb)).catch(()=>{});}
-</script>
-<script type="text/babel">
-const { useState, useEffect, useCallback } = React;
-const sb = supabase.createClient(
+  <div id="root"></div>
+  
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  
+  <script type="text/babel">
+const { useState, useEffect } = React;
+const { createClient } = supabase;
+
+
+// 실제 EPIDENCE 로고
+const LOGO_BASE64 = 'data:image/jpeg;base64,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';
+
+const sb = createClient(
   'https://fkvktmkcoyfvtsluzmeo.supabase.co',
   'sb_publishable_HBGYuYTBxwoeSBNG204NCw_gNd3fIfv'
 );
+
 const fNum = n => Math.round(n||0).toLocaleString('ko-KR');
-const fMan = n => Math.round((n||0)/10000).toLocaleString('ko-KR')+'만원';
-const fUk  = n => ((n||0)/100000000).toFixed(2)+'억원';
+const fMan = n => Math.round((n||0)/10000) + '만';
+const fUk  = n => ((n||0)/100000000).toFixed(1) + '억';
 const thisMonth = () => new Date().toISOString().slice(0,7);
 
-// ── 로그인 ────────────────────────────────────────────────────────
-function LoginScreen({onLogin}) {
-  const [pin,setPin]=useState('');
-  const [error,setError]=useState('');
-  const [loading,setLoading]=useState(false);
+const css = `
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Malgun Gothic',sans-serif;background:#f0f2f5;-webkit-text-size-adjust:100%;overflow-x:hidden;}
+  .btn{border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;}
+  .btn:active{opacity:0.7;transform:scale(0.98);}
+  .card{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+  
+  /* 전화 링크 */
+  a[href^="tel:"]{transition:all 0.2s ease;}
+  a[href^="tel:"]:hover{opacity:0.8;transform:scale(1.02);}
+  a[href^="tel:"]:active{transform:scale(0.98);}
+  
+  /* 수납 모달 */
+  .pay-tab{padding:5px 10px;border:2px solid #ddd;border-radius:14px;background:white;font-size:11px;font-weight:bold;color:#7f8c8d;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .pay-tab.active{background:#3498db;border-color:#3498db;color:white;}
+  .pay-tab-fee.active{background:#e67e22;border-color:#e67e22;}
+  .pay-tab-other.active{background:#9b59b6;border-color:#9b59b6;}
+  .pay-btn-unpaid{background:#ecf0f1;color:#7f8c8d;border:2px dashed #bdc3c7;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:bold;width:100%;cursor:pointer;}
+  .pay-btn-paid{background:#d5f5e3;color:#27ae60;border:2px solid #27ae60;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:bold;width:100%;}
+  .pay-btn-cancel{background:#fdeaea;color:#e74c3c;border:2px solid #e74c3c;border-radius:6px;padding:3px 6px;font-size:10px;cursor:pointer;margin-top:3px;width:100%;}
+  
+  
+  @media(max-width:768px){
+    #sidebar{display:none!important;}
+    #main{margin-left:0!important;padding:10px!important;padding-bottom:70px!important;}
+    #mob-nav{display:flex!important;}
+    .stat-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important;}
+    h2{font-size:18px!important;margin-bottom:10px!important;}
+    .modal-inner{width:100%!important;max-width:100%!important;border-radius:16px 16px 0 0!important;max-height:88vh!important;margin:0!important;}
+    .modal-wrap{align-items:flex-end!important;padding:0!important;}
+  }
+  
+  @media(min-width:769px){
+    #mob-nav{display:none!important;}
+  }
+  
+  /* 모바일 네비게이션 */
+  #mob-nav{position:fixed;bottom:0;left:0;right:0;background:#2c3e50;z-index:500;padding:3px 0;display:none;}
+  .mob-btn{flex:1;display:flex;flex-direction:column;align-items:center;background:none;border:none;color:#95a5a6;padding:3px;font-size:9px;gap:1px;cursor:pointer;}
+  .mob-btn span:first-child{font-size:17px;line-height:1;}
+  .mob-btn.active{color:#3498db;}
+  
+  /* 로그인 */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2c3e50,#3498db);padding:16px;}
+  .login-box{background:white;border-radius:16px;padding:28px;width:100%;max-width:340px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);}
+  .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+  .pin-btn{padding:14px;font-size:18px;font-weight:bold;background:#f8f9fa;border:2px solid #ecf0f1;border-radius:8px;cursor:pointer;color:#2c3e50;}
+  .pin-btn:active{background:#3498db;color:white;}
+`;
+
+function LoginScreen({ onLogin }) {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const handleNum = n => {
-    if(pin.length>=6||loading) return;
-    const next=pin+n; setPin(next); setError('');
-    if(next.length>=4) checkPin(next);
+    if (pin.length >= 6 || loading) return;
+    const next = pin + n;
+    setPin(next); setError('');
+    if (next.length >= 4) checkPin(next);
   };
+
   const checkPin = async code => {
     setLoading(true);
-    const {data}=await sb.from('admins').select('*').eq('passcode',code).eq('active',true);
-    if(data&&data.length>0){ onLogin(data[0]); }
-    else { setTimeout(()=>{setError('❌ 비밀번호 오류');setPin('');setLoading(false);},400); }
+    const { data } = await sb.from('admins').select('*').eq('passcode', code).eq('active', true);
+    if (data && data.length > 0) { onLogin(data[0]); }
+    else { setTimeout(() => { setError('❌ 오류'); setPin(''); setLoading(false); }, 400); }
   };
+
   return (
     <div className="login-wrap">
       <div className="login-box">
-        <div style={{fontSize:'52px',marginBottom:'12px'}}>🏢</div>
-        <h1 style={{fontSize:'24px',color:'#2c3e50',marginBottom:'4px',fontWeight:'bold'}}>올인스페이스</h1>
-        <p style={{color:'#7f8c8d',fontSize:'14px',marginBottom:'24px'}}>임대관리 시스템</p>
-        <div style={{background:'#f8f9fa',borderRadius:'12px',padding:'14px 20px',marginBottom:'8px',minHeight:'56px',display:'flex',alignItems:'center',justifyContent:'center'}}>
-          {loading?<span style={{color:'#27ae60',fontSize:'18px'}}>✔ 확인중...</span>:
-            <span style={{fontSize:'32px',letterSpacing:'10px',color:'#2c3e50'}}>
-              {pin?pin.split('').map(()=>'●').join(' '):<span style={{fontSize:'14px',color:'#bdc3c7',letterSpacing:'1px'}}>비밀번호 입력</span>}
+        <div style={{ 
+          width: '100px', 
+          height: '100px', 
+          borderRadius: '50%', 
+          background: 'white', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          marginBottom: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          <img src={LOGO_BASE64} alt="EPIDENCE" style={{ 
+            width: '70%', 
+            height: '70%', 
+            objectFit: 'contain'
+          }} />
+        </div>
+        <h1 style={{ fontSize: '24px', color: '#2c3e50', marginBottom: '4px', fontWeight: 'bold', letterSpacing: '2px' }}>EPIDENCE</h1>
+        <p style={{ color: '#7f8c8d', fontSize: '12px', marginBottom: '18px' }}>올인스페이스 임대관리</p>
+        <div style={{ background: '#f8f9fa', borderRadius: '8px', padding: '10px', marginBottom: '6px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {loading ? <span style={{ color: '#27ae60', fontSize: '15px' }}>✔ 확인중...</span> :
+            <span style={{ fontSize: '26px', letterSpacing: '7px', color: '#2c3e50' }}>
+              {pin ? pin.split('').map(() => '●').join(' ') : <span style={{ fontSize: '12px', color: '#bdc3c7' }}>비밀번호 입력</span>}
             </span>}
         </div>
-        {error&&<div style={{color:'#e74c3c',fontSize:'14px',marginBottom:'8px',fontWeight:'bold'}}>{error}</div>}
+        {error && <div style={{ color: '#e74c3c', fontSize: '12px', marginBottom: '6px', fontWeight: 'bold' }}>{error}</div>}
         <div className="pin-grid">
-          {[1,2,3,4,5,6,7,8,9].map(n=><button key={n} className="pin-btn" onClick={()=>handleNum(String(n))}>{n}</button>)}
-          <button className="pin-btn" onClick={()=>{setPin('');setError('');}} style={{color:'#e74c3c'}}>C</button>
-          <button className="pin-btn" onClick={()=>handleNum('0')}>0</button>
-          <button className="pin-btn" onClick={()=>setPin(p=>p.slice(0,-1))} style={{color:'#e74c3c'}}>⌫</button>
+          {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} className="pin-btn" onClick={() => handleNum(String(n))}>{n}</button>)}
+          <button className="pin-btn" onClick={() => { setPin(''); setError(''); }} style={{ color: '#e74c3c' }}>C</button>
+          <button className="pin-btn" onClick={() => handleNum('0')}>0</button>
+          <button className="pin-btn" onClick={() => setPin(p => p.slice(0, -1))} style={{ color: '#e74c3c' }}>⌫</button>
         </div>
-        <p style={{fontSize:'12px',color:'#bdc3c7',marginTop:'8px'}}>관리자 코드를 입력하세요</p>
+        <p style={{ fontSize: '10px', color: '#bdc3c7', marginTop: '6px' }}>관리자 코드 입력</p>
       </div>
     </div>
   );
 }
 
-// ── 수납 관리 모달 ────────────────────────────────────────────────
-function PaymentModal({tenant, payments, onClose, onRefresh}) {
-  const [activeType, setActiveType] = useState('rent'); // rent, fee, other
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [otherModal, setOtherModal] = useState(null); // {yearMonth}
-  const [otherForm, setOtherForm] = useState({amount:'', note:''});
+// ── 대출 상세 관리 모달 ───────────────────────────────────────────────
+function LoanDetailModal({ loan, loanPayments, onClose, onRefresh }) {
+  const [editing, setEditing] = useState(false);
+  const [loanData, setLoanData] = useState({ ...loan });
+  const [paymentForm, setPaymentForm] = useState({ payment_date: new Date().toISOString().split('T')[0], amount: '', note: '' });
   const [saving, setSaving] = useState(false);
 
-  const months = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
+  const payments = loanPayments.filter(p => p.loan_id === loan.id).sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date));
+  const totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0);
+  const currentBalance = (loan.initial_amount || loan.remaining_amount || 0) - totalPaid;
+  const yearlyInterest = currentBalance * (loanData.final_rate || 0);
+  const monthlyInterest = yearlyInterest / 12;
 
-  // 해당 호수의 수납 데이터 필터
-  const tenantPayments = payments.filter(p => p.tenant_id === tenant.id);
+  const handleSaveLoan = async () => {
+    setSaving(true);
+    try {
+      const { error } = await sb.from('loans').update({ remaining_amount: currentBalance, final_rate: loanData.final_rate }).eq('id', loan.id);
+      if (error) { alert('실패: ' + error.message); setSaving(false); return; }
+      await onRefresh(); setEditing(false); setSaving(false);
+    } catch (err) { alert('오류: ' + err.message); setSaving(false); }
+  };
 
-  const getPayment = (ym, type) => tenantPayments.filter(p => p.year_month===ym && p.type===type);
+  const handleAddPayment = async () => {
+    if (!paymentForm.amount || parseInt(paymentForm.amount) <= 0) { alert('상환액 입력'); return; }
+    setSaving(true);
+    try {
+      const { error } = await sb.from('loan_payments').insert([{ loan_id: loan.id, payment_date: paymentForm.payment_date, amount: parseInt(paymentForm.amount), note: paymentForm.note || '대출 상환' }]);
+      if (error) { alert('실패: ' + error.message); setSaving(false); return; }
+      const newBalance = currentBalance - parseInt(paymentForm.amount);
+      await sb.from('loans').update({ remaining_amount: newBalance }).eq('id', loan.id);
+      await onRefresh(); setPaymentForm({ payment_date: new Date().toISOString().split('T')[0], amount: '', note: '' }); setSaving(false);
+    } catch (err) { alert('오류: ' + err.message); setSaving(false); }
+  };
 
-  const isPaid = (ym, type) => {
-    const pays = getPayment(ym, type);
-    if(type==='rent') return pays.some(p=>p.amount>0);
-    if(type==='fee') return pays.some(p=>p.amount>0);
-    return pays.length>0;
+  const handleDeletePayment = async (paymentId, amount) => {
+    if (!window.confirm('상환 내역을 삭제하시겠습니까?')) return;
+    setSaving(true);
+    try {
+      const { error } = await sb.from('loan_payments').delete().eq('id', paymentId);
+      if (error) { alert('실패: ' + error.message); setSaving(false); return; }
+      const newBalance = currentBalance + amount;
+      await sb.from('loans').update({ remaining_amount: newBalance }).eq('id', loan.id);
+      await onRefresh(); setSaving(false);
+    } catch (err) { alert('오류: ' + err.message); setSaving(false); }
+  };
+
+  return (
+    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ background: '#2c3e50', color: 'white', padding: '16px', borderRadius: '16px 16px 0 0', position: 'sticky', top: 0, zIndex: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>🏦 {loan.lender_name}</div>
+              <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>대출 상세 관리</div>
+            </div>
+            <button onClick={onClose} style={{ background: '#e74c3c', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '18px', cursor: 'pointer', fontWeight: 'bold', flexShrink: 0, marginLeft: '10px' }}>×</button>
+          </div>
+        </div>
+        <div style={{ padding: '16px' }}>
+          <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h3 style={{ fontSize: '15px', color: '#2c3e50' }}>💰 대출 정보</h3>
+              <button onClick={() => setEditing(!editing)} style={{ padding: '5px 10px', background: editing ? '#95a5a6' : '#3498db', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>{editing ? '취소' : '수정'}</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+              <div><div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '4px' }}>초기 대출액</div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#c0392b' }}>{fNum(loan.initial_amount || loan.remaining_amount)}원</div></div>
+              <div><div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '4px' }}>총 상환액</div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#27ae60' }}>{fNum(totalPaid)}원</div></div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div><div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '4px' }}>현재 잔액</div><div style={{ fontSize: '18px', fontWeight: 'bold', color: '#c0392b' }}>{fNum(currentBalance)}원</div></div>
+              <div><div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '4px' }}>금리 (%)</div>
+                {editing ? <input type="number" step="0.01" min="0" max="100" value={(loanData.final_rate * 100).toFixed(2)} onChange={e => setLoanData({ ...loanData, final_rate: parseFloat(e.target.value) / 100 || 0 })} style={{ width: '100%', padding: '6px', border: '2px solid #3498db', borderRadius: '6px', fontSize: '14px', fontWeight: 'bold' }} /> : <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#2c3e50' }}>{((loanData.final_rate || 0) * 100).toFixed(2)}%</div>}
+              </div>
+            </div>
+            {editing && <button onClick={handleSaveLoan} disabled={saving} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}>💾 저장</button>}
+          </div>
+          <div style={{ background: '#fef9f0', border: '2px solid #f39c12', borderRadius: '10px', padding: '12px', marginBottom: '14px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#2c3e50' }}>📊 이자 자동계산</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}><span style={{ fontSize: '12px', color: '#7f8c8d' }}>연 이자</span><strong style={{ color: '#e67e22', fontSize: '14px' }}>{fNum(yearlyInterest)}원</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: '12px', color: '#7f8c8d' }}>월 이자</span><strong style={{ color: '#e74c3c', fontSize: '16px' }}>{fNum(monthlyInterest)}원</strong></div>
+          </div>
+          <div style={{ background: '#e8f8f5', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
+            <h3 style={{ fontSize: '15px', color: '#2c3e50', marginBottom: '10px' }}>💸 상환 추가</h3>
+            <div style={{ marginBottom: '8px' }}><label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '4px' }}>상환일</label><input type="date" value={paymentForm.payment_date} onChange={e => setPaymentForm({ ...paymentForm, payment_date: e.target.value })} style={{ width: '100%', padding: '8px', border: '2px solid #27ae60', borderRadius: '6px', fontSize: '13px' }} /></div>
+            <div style={{ marginBottom: '8px' }}><label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '4px' }}>상환액 (원)</label><input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} placeholder="1000000" style={{ width: '100%', padding: '8px', border: '2px solid #27ae60', borderRadius: '6px', fontSize: '13px' }} /></div>
+            <div style={{ marginBottom: '10px' }}><label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '4px' }}>메모</label><input value={paymentForm.note} onChange={e => setPaymentForm({ ...paymentForm, note: e.target.value })} placeholder="중도상환..." style={{ width: '100%', padding: '8px', border: '2px solid #ecf0f1', borderRadius: '6px', fontSize: '13px' }} /></div>
+            <button onClick={handleAddPayment} disabled={saving} style={{ width: '100%', padding: '10px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}>➕ 상환 추가</button>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '15px', color: '#2c3e50', marginBottom: '10px' }}>📋 상환 내역 ({payments.length}건)</h3>
+            {payments.length === 0 ? <div style={{ textAlign: 'center', padding: '30px', color: '#95a5a6', fontSize: '13px' }}>상환 내역이 없습니다</div> :
+              payments.map(p => (
+                <div key={p.id} style={{ background: '#f8f9fa', borderRadius: '8px', padding: '10px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27ae60', marginBottom: '2px' }}>{fNum(p.amount)}원</div><div style={{ fontSize: '11px', color: '#7f8c8d' }}>{p.payment_date} · {p.note}</div></div>
+                  <button onClick={() => handleDeletePayment(p.id, p.amount)} style={{ background: '#e74c3c', color: 'white', border: 'none', borderRadius: '6px', padding: '5px 8px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', flexShrink: 0, marginLeft: '8px' }}>삭제</button>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentModal({ tenant, payments, onClose, onRefresh }) {
+  const [activeType, setActiveType] = useState('rent');
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [otherModal, setOtherModal] = useState(null);
+  const [otherForm, setOtherForm] = useState({ amount: '', note: '' });
+  const [saving, setSaving] = useState(false);
+  const [monthlyAmounts, setMonthlyAmounts] = useState({});
+
+  const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const tp = payments.filter(p => p.tenant_id === tenant.id);
+  const getPays = (ym, type) => tp.filter(p => p.year_month === ym && p.type === type);
+  const isPaid = (ym, type) => getPays(ym, type).length > 0;
+
+  const getAmount = (ym, type) => {
+    const key = `${ym}-${type}`;
+    if (monthlyAmounts[key] !== undefined) return monthlyAmounts[key];
+    return type === 'rent' ? tenant.monthly_rent : tenant.maintenance_fee;
+  };
+
+  const setAmount = (ym, type, value) => {
+    setMonthlyAmounts({ ...monthlyAmounts, [`${ym}-${type}`]: parseInt(value) || 0 });
   };
 
   const handlePay = async (ym, type) => {
-    if(saving) return;
-    if(isPaid(ym,type)) return;
+    if (saving || isPaid(ym, type)) return;
     setSaving(true);
-    const amount = type==='rent' ? tenant.monthly_rent : tenant.maintenance_fee;
-    await sb.from('payments').insert([{tenant_id:tenant.id, year_month:ym, type, amount, note:'수납완료'}]);
-    await onRefresh();
-    setSaving(false);
+    try {
+      const amount = getAmount(ym, type);
+      const { error } = await sb.from('payments').insert([{ tenant_id: tenant.id, year_month: ym, type, amount, note: '수납완료' }]);
+      if (error) { alert('실패: ' + error.message); setSaving(false); return; }
+      await onRefresh(); setSaving(false);
+    } catch (err) { alert('오류: ' + err.message); setSaving(false); }
   };
 
   const handleCancel = async (ym, type) => {
-    if(!window.confirm('수납을 취소하시겠습니까?')) return;
-    const pays = getPayment(ym, type);
-    for(const p of pays) await sb.from('payments').delete().eq('id',p.id);
-    await onRefresh();
+    if (!window.confirm('취소하시겠습니까?')) return;
+    try {
+      for (const p of getPays(ym, type)) {
+        const { error } = await sb.from('payments').delete().eq('id', p.id);
+        if (error) { alert('실패: ' + error.message); return; }
+      }
+      await onRefresh();
+    } catch (err) { alert('오류: ' + err.message); }
   };
 
   const handleOtherSave = async () => {
-    if(!otherForm.amount || parseInt(otherForm.amount)<=0) return;
+    if (!otherForm.amount || parseInt(otherForm.amount) <= 0) { alert('금액 입력'); return; }
     setSaving(true);
-    await sb.from('payments').insert([{tenant_id:tenant.id, year_month:otherModal, type:'other', amount:parseInt(otherForm.amount), note:otherForm.note||'기타수납'}]);
-    await onRefresh();
-    setOtherModal(null);
-    setOtherForm({amount:'',note:''});
-    setSaving(false);
+    try {
+      const { error } = await sb.from('payments').insert([{ tenant_id: tenant.id, year_month: otherModal, type: 'other', amount: parseInt(otherForm.amount), note: otherForm.note || '기타' }]);
+      if (error) { alert('실패: ' + error.message); setSaving(false); return; }
+      await onRefresh(); setOtherModal(null); setOtherForm({ amount: '', note: '' }); setSaving(false);
+    } catch (err) { alert('오류: ' + err.message); setSaving(false); }
   };
 
-  const handleOtherDelete = async (id) => {
-    if(!window.confirm('삭제하시겠습니까?')) return;
-    await sb.from('payments').delete().eq('id',id);
-    await onRefresh();
-  };
-
-  // 연도별 합계
-  const yearPaid = {rent:0, fee:0, other:0};
+  const yearTotals = { rent: 0, fee: 0, other: 0 };
   months.forEach(m => {
     const ym = `${year}-${m}`;
-    getPayment(ym,'rent').forEach(p=>yearPaid.rent+=p.amount);
-    getPayment(ym,'fee').forEach(p=>yearPaid.fee+=p.amount);
-    getPayment(ym,'other').forEach(p=>yearPaid.other+=p.amount);
+    getPays(ym, 'rent').forEach(p => yearTotals.rent += p.amount);
+    getPays(ym, 'fee').forEach(p => yearTotals.fee += p.amount);
+    getPays(ym, 'other').forEach(p => yearTotals.other += p.amount);
   });
-  const totalPaid = yearPaid.rent+yearPaid.fee+yearPaid.other;
-  const expected = {rent: tenant.monthly_rent*12, fee: tenant.maintenance_fee*12};
-
-  const typeLabel = {rent:'월세', fee:'관리비', other:'기타'};
-  const typeColor = {rent:'#3498db', fee:'#e67e22', other:'#9b59b6'};
-  const typeExpected = {rent:tenant.monthly_rent, fee:tenant.maintenance_fee, other:0};
 
   return (
-    <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.65)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center',padding:'16px'}}
-      onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div style={{background:'white',borderRadius:'20px',width:'100%',maxWidth:'680px',maxHeight:'92vh',overflowY:'auto',position:'relative'}} onClick={e=>e.stopPropagation()}>
-
-        {/* 헤더 */}
-        <div style={{background:'#2c3e50',color:'white',padding:'20px 24px',borderRadius:'20px 20px 0 0',position:'sticky',top:0,zIndex:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <div>
-              <div style={{fontSize:'20px',fontWeight:'bold'}}>🏠 {tenant.room} {tenant.name}</div>
-              <div style={{fontSize:'13px',opacity:0.7,marginTop:'3px'}}>월세 {fNum(tenant.monthly_rent)}원 / 관리비 {fNum(tenant.maintenance_fee)}원</div>
+    <div className="modal-wrap" onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}>
+      <div className="modal-inner" style={{ background: 'white', borderRadius: '14px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ background: '#2c3e50', color: 'white', padding: '14px', borderRadius: '14px 14px 0 0', position: 'sticky', top: 0, zIndex: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '16px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>🏠 {tenant.room} {tenant.name}</div>
+              <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>월세 {fMan(tenant.monthly_rent)} / 관리비 {fMan(tenant.maintenance_fee)}</div>
             </div>
-            <button onClick={onClose} style={{background:'#e74c3c',color:'white',border:'none',borderRadius:'50%',width:'34px',height:'34px',fontSize:'20px',cursor:'pointer',fontWeight:'bold',lineHeight:1}}>×</button>
+            <button onClick={onClose} style={{ background: '#e74c3c', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', fontSize: '16px', cursor: 'pointer', fontWeight: 'bold', flexShrink: 0, marginLeft: '8px' }}>×</button>
           </div>
-
-          {/* 연도 선택 */}
-          <div style={{display:'flex',alignItems:'center',gap:'12px',marginTop:'14px'}}>
-            <button onClick={()=>setYear(y=>y-1)} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',borderRadius:'8px',padding:'6px 12px',cursor:'pointer',fontSize:'16px'}}>◀</button>
-            <span style={{fontSize:'18px',fontWeight:'bold'}}>{year}년</span>
-            <button onClick={()=>setYear(y=>y+1)} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',borderRadius:'8px',padding:'6px 12px',cursor:'pointer',fontSize:'16px'}}>▶</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <button onClick={() => setYear(y => y - 1)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '13px' }}>◀</button>
+            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{year}년</span>
+            <button onClick={() => setYear(y => y + 1)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', borderRadius: '5px', padding: '3px 8px', cursor: 'pointer', fontSize: '13px' }}>▶</button>
           </div>
-
-          {/* 탭 */}
-          <div style={{display:'flex',gap:'8px',marginTop:'14px'}}>
-            {['rent','fee','other'].map(type=>(
-              <button key={type} className={`pay-tab${activeType===type?' active':''}`}
-                onClick={()=>setActiveType(type)}
-                style={{borderColor: activeType===type ? typeColor[type] : '#ddd', background: activeType===type ? typeColor[type] : 'rgba(255,255,255,0.9)', color: activeType===type ? 'white' : '#555'}}>
-                {typeLabel[type]}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <button className={`pay-tab${activeType === 'rent' ? ' active' : ''}`} onClick={() => setActiveType('rent')}>💙월세</button>
+            <button className={`pay-tab pay-tab-fee${activeType === 'fee' ? ' active' : ''}`} onClick={() => setActiveType('fee')}>🧡관리비</button>
+            <button className={`pay-tab pay-tab-other${activeType === 'other' ? ' active' : ''}`} onClick={() => setActiveType('other')}>💜기타</button>
           </div>
         </div>
 
-        <div style={{padding:'20px 24px'}}>
-          {/* 연 수납 요약 */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'10px',marginBottom:'20px'}}>
+        <div style={{ padding: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '6px', marginBottom: '12px' }}>
             {[
-              {label:'월세 수납', val:yearPaid.rent, exp:expected.rent, color:'#3498db'},
-              {label:'관리비 수납', val:yearPaid.fee, exp:expected.fee, color:'#e67e22'},
-              {label:'기타 수납', val:yearPaid.other, exp:null, color:'#9b59b6'},
-            ].map(({label,val,exp,color})=>(
-              <div key={label} style={{background:'#f8f9fa',borderRadius:'12px',padding:'12px',borderLeft:`4px solid ${color}`}}>
-                <div style={{fontSize:'11px',color:'#7f8c8d',marginBottom:'4px'}}>{label}</div>
-                <div style={{fontSize:'16px',fontWeight:'bold',color}}>{fNum(val)}원</div>
-                {exp!=null && <div style={{fontSize:'11px',color:val>=exp?'#27ae60':'#e74c3c',marginTop:'2px'}}>/ {fNum(exp)}원 ({exp>0?Math.round(val/exp*100):0}%)</div>}
+              { label: '월세', val: yearTotals.rent, exp: tenant.monthly_rent * 12, color: '#3498db' },
+              { label: '관리비', val: yearTotals.fee, exp: tenant.maintenance_fee * 12, color: '#e67e22' },
+              { label: '기타', val: yearTotals.other, color: '#9b59b6' },
+            ].map(({ label, val, exp, color }) => (
+              <div key={label} style={{ background: '#f8f9fa', borderRadius: '8px', padding: '8px', borderLeft: `3px solid ${color}` }}>
+                <div style={{ fontSize: '9px', color: '#7f8c8d', marginBottom: '2px' }}>{label}</div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold', color }}>{fMan(val)}</div>
+                {exp && <div style={{ fontSize: '9px', color: val >= exp ? '#27ae60' : '#e74c3c', marginTop: '1px' }}>/ {fMan(exp)} ({Math.round(val / exp * 100)}%)</div>}
               </div>
             ))}
           </div>
 
-          {/* 월세 탭 */}
-          {activeType==='rent' && (
+          {(activeType === 'rent' || activeType === 'fee') && (
             <div>
-              <div style={{display:'grid',gridTemplateColumns:'60px 1fr 100px',gap:'8px',padding:'8px 0',borderBottom:'2px solid #ecf0f1',marginBottom:'8px'}}>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>월</div>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>금액</div>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>수납상태</div>
-              </div>
-              {months.map(m=>{
-                const ym=`${year}-${m}`;
-                const paid=isPaid(ym,'rent');
-                const pays=getPayment(ym,'rent');
+              {months.map(m => {
+                const ym = `${year}-${m}`;
+                const paid = isPaid(ym, activeType);
+                const amount = getAmount(ym, activeType);
                 return (
-                  <div key={m} style={{display:'grid',gridTemplateColumns:'60px 1fr 100px',gap:'8px',alignItems:'center',padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
-                    <div style={{fontSize:'15px',fontWeight:'bold',color:'#2c3e50'}}>{parseInt(m)}월</div>
-                    <div style={{fontSize:'14px',color:'#2c3e50'}}>{fNum(tenant.monthly_rent)}원</div>
+                  <div key={m} style={{ display: 'grid', gridTemplateColumns: '35px 1fr 75px', gap: '6px', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#2c3e50' }}>{parseInt(m)}월</div>
+                    <div>
+                      {paid ? (
+                        <div style={{ fontSize: '12px', color: '#2c3e50', fontWeight: 'bold' }}>{fNum(amount)}</div>
+                      ) : (
+                        <input type="number" value={amount} onChange={e => setAmount(ym, activeType, e.target.value)}
+                          style={{ width: '100%', padding: '5px', border: '2px solid #3498db', borderRadius: '5px', fontSize: '12px', fontWeight: 'bold', color: '#2c3e50' }} />
+                      )}
+                    </div>
                     <div>
                       {paid ? (
                         <>
-                          <div className="pay-btn-paid">✅ 수납완료</div>
-                          <button className="pay-btn-cancel" onClick={()=>handleCancel(ym,'rent')}>취소</button>
+                          <div className="pay-btn-paid">✅완료</div>
+                          <button className="pay-btn-cancel" onClick={() => handleCancel(ym, activeType)}>취소</button>
                         </>
                       ) : (
-                        <button className="pay-btn-unpaid" onClick={()=>handlePay(ym,'rent')} disabled={saving}>
-                          💰 수납
-                        </button>
+                        <button className="pay-btn-unpaid" onClick={() => handlePay(ym, activeType)} disabled={saving}>💰수납</button>
                       )}
                     </div>
                   </div>
@@ -268,64 +386,29 @@ function PaymentModal({tenant, payments, onClose, onRefresh}) {
             </div>
           )}
 
-          {/* 관리비 탭 */}
-          {activeType==='fee' && (
+          {activeType === 'other' && (
             <div>
-              <div style={{display:'grid',gridTemplateColumns:'60px 1fr 100px',gap:'8px',padding:'8px 0',borderBottom:'2px solid #ecf0f1',marginBottom:'8px'}}>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>월</div>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>금액</div>
-                <div style={{fontSize:'12px',color:'#7f8c8d',fontWeight:'bold'}}>수납상태</div>
-              </div>
-              {months.map(m=>{
-                const ym=`${year}-${m}`;
-                const paid=isPaid(ym,'fee');
+              {months.map(m => {
+                const ym = `${year}-${m}`;
+                const others = getPays(ym, 'other');
                 return (
-                  <div key={m} style={{display:'grid',gridTemplateColumns:'60px 1fr 100px',gap:'8px',alignItems:'center',padding:'10px 0',borderBottom:'1px solid #f5f5f5'}}>
-                    <div style={{fontSize:'15px',fontWeight:'bold',color:'#2c3e50'}}>{parseInt(m)}월</div>
-                    <div style={{fontSize:'14px',color:'#2c3e50'}}>{fNum(tenant.maintenance_fee)}원</div>
-                    <div>
-                      {paid ? (
-                        <>
-                          <div className="pay-btn-paid">✅ 수납완료</div>
-                          <button className="pay-btn-cancel" onClick={()=>handleCancel(ym,'fee')}>취소</button>
-                        </>
-                      ) : (
-                        <button className="pay-btn-unpaid" onClick={()=>handlePay(ym,'fee')} disabled={saving}>
-                          💰 수납
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* 기타 탭 */}
-          {activeType==='other' && (
-            <div>
-              {months.map(m=>{
-                const ym=`${year}-${m}`;
-                const others=getPayment(ym,'other');
-                return (
-                  <div key={m} style={{padding:'12px 0',borderBottom:'1px solid #f5f5f5'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom: others.length>0?'8px':'0'}}>
-                      <span style={{fontSize:'15px',fontWeight:'bold',color:'#2c3e50'}}>{parseInt(m)}월</span>
-                      <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                        {others.length>0 && <span style={{fontSize:'13px',color:'#9b59b6',fontWeight:'bold'}}>합계: {fNum(others.reduce((s,p)=>s+p.amount,0))}원</span>}
-                        <button onClick={()=>{setOtherModal(ym);setOtherForm({amount:'',note:''});}}
-                          style={{background:'#9b59b6',color:'white',border:'none',borderRadius:'8px',padding:'6px 12px',cursor:'pointer',fontSize:'13px',fontWeight:'bold'}}>
-                          + 추가
-                        </button>
+                  <div key={m} style={{ padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: others.length > 0 ? '5px' : '0' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#2c3e50' }}>{parseInt(m)}월</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        {others.length > 0 && <span style={{ fontSize: '11px', color: '#9b59b6', fontWeight: 'bold' }}>{fMan(others.reduce((s, p) => s + p.amount, 0))}</span>}
+                        <button onClick={() => { setOtherModal(ym); setOtherForm({ amount: '', note: '' }); }}
+                          style={{ background: '#9b59b6', color: 'white', border: 'none', borderRadius: '5px', padding: '4px 8px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>+</button>
                       </div>
                     </div>
-                    {others.map(p=>(
-                      <div key={p.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',background:'#f5f0ff',borderRadius:'8px',padding:'8px 12px',marginBottom:'6px'}}>
-                        <div>
-                          <div style={{fontSize:'14px',fontWeight:'bold',color:'#9b59b6'}}>{fNum(p.amount)}원</div>
-                          <div style={{fontSize:'12px',color:'#7f8c8d'}}>{p.note}</div>
+                    {others.map(p => (
+                      <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f5f0ff', borderRadius: '5px', padding: '5px 8px', marginBottom: '3px' }}>
+                        <div style={{ flex: 1, minWidth: 0, marginRight: '6px' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#9b59b6' }}>{fNum(p.amount)}</div>
+                          <div style={{ fontSize: '10px', color: '#7f8c8d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.note}</div>
                         </div>
-                        <button onClick={()=>handleOtherDelete(p.id)} style={{background:'#e74c3c',color:'white',border:'none',borderRadius:'6px',padding:'4px 8px',cursor:'pointer',fontSize:'12px'}}>삭제</button>
+                        <button onClick={async () => { if (!confirm('삭제?')) return; await sb.from('payments').delete().eq('id', p.id); await onRefresh(); }}
+                          style={{ background: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', padding: '3px 6px', cursor: 'pointer', fontSize: '10px', flexShrink: 0 }}>삭제</button>
                       </div>
                     ))}
                   </div>
@@ -336,19 +419,20 @@ function PaymentModal({tenant, payments, onClose, onRefresh}) {
         </div>
       </div>
 
-      {/* 기타 입력 서브모달 */}
       {otherModal && (
-        <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.5)',zIndex:3000,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}
-          onClick={e=>{if(e.target===e.currentTarget)setOtherModal(null);}}>
-          <div style={{background:'white',borderRadius:'16px',padding:'24px',width:'100%',maxWidth:'360px'}}>
-            <h3 style={{fontSize:'18px',color:'#2c3e50',marginBottom:'16px'}}>💜 기타 수납 - {otherModal}</h3>
-            <label style={{display:'block',fontSize:'13px',fontWeight:'bold',color:'#2c3e50',marginBottom:'6px'}}>금액 (원)</label>
-            <input type="number" value={otherForm.amount} onChange={e=>setOtherForm({...otherForm,amount:e.target.value})} placeholder="예: 50000" style={{width:'100%',padding:'12px',border:'2px solid #9b59b6',borderRadius:'8px',fontSize:'16px',marginBottom:'12px',boxSizing:'border-box'}}/>
-            <label style={{display:'block',fontSize:'13px',fontWeight:'bold',color:'#2c3e50',marginBottom:'6px'}}>메모</label>
-            <input value={otherForm.note} onChange={e=>setOtherForm({...otherForm,note:e.target.value})} placeholder="예: 주차비, 연장수수료..." style={{width:'100%',padding:'12px',border:'2px solid #ecf0f1',borderRadius:'8px',fontSize:'16px',marginBottom:'16px',boxSizing:'border-box'}}/>
-            <div style={{display:'flex',gap:'10px'}}>
-              <button onClick={()=>setOtherModal(null)} style={{flex:1,padding:'13px',background:'#95a5a6',color:'white',border:'none',borderRadius:'8px',cursor:'pointer',fontSize:'15px',fontWeight:'bold'}}>취소</button>
-              <button onClick={handleOtherSave} disabled={saving} style={{flex:1,padding:'13px',background:'#9b59b6',color:'white',border:'none',borderRadius:'8px',cursor:'pointer',fontSize:'15px',fontWeight:'bold'}}>저장</button>
+        <div onClick={e => { if (e.target === e.currentTarget) setOtherModal(null); }}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px' }}>
+          <div style={{ background: 'white', borderRadius: '12px', padding: '18px', width: '100%', maxWidth: '320px' }}>
+            <h3 style={{ fontSize: '15px', color: '#2c3e50', marginBottom: '12px' }}>💜 기타 수납 - {otherModal}</h3>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '3px' }}>금액 (원)</label>
+            <input type="number" value={otherForm.amount} onChange={e => setOtherForm({ ...otherForm, amount: e.target.value })} placeholder="50000"
+              style={{ width: '100%', padding: '8px', border: '2px solid #9b59b6', borderRadius: '5px', fontSize: '13px', marginBottom: '8px' }} />
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '3px' }}>메모</label>
+            <input value={otherForm.note} onChange={e => setOtherForm({ ...otherForm, note: e.target.value })} placeholder="주차비..."
+              style={{ width: '100%', padding: '8px', border: '2px solid #ecf0f1', borderRadius: '5px', fontSize: '13px', marginBottom: '12px' }} />
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button onClick={() => setOtherModal(null)} className="btn" style={{ flex: 1, padding: '10px', background: '#95a5a6', color: 'white' }}>취소</button>
+              <button onClick={handleOtherSave} disabled={saving} className="btn" style={{ flex: 1, padding: '10px', background: '#9b59b6', color: 'white' }}>저장</button>
             </div>
           </div>
         </div>
@@ -357,520 +441,828 @@ function PaymentModal({tenant, payments, onClose, onRefresh}) {
   );
 }
 
-// ── 메인 앱 ──────────────────────────────────────────────────────
-function App() {
-  const [admin,setAdmin]=useState(null);
-  const [activeTab,setActiveTab]=useState('dashboard');
-  const [tenants,setTenants]=useState([]);
-  const [expenses,setExpenses]=useState([]);
-  const [loans,setLoans]=useState([]);
-  const [admins,setAdmins]=useState([]);
-  const [expenseCategories,setExpenseCategories]=useState([]);
-  const [payments,setPayments]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const [showModal,setShowModal]=useState(false);
-  const [modalType,setModalType]=useState('');
-  const [editItem,setEditItem]=useState(null);
-  const [formData,setFormData]=useState({});
-  const [selectedMonth,setSelectedMonth]=useState(thisMonth());
-  const [tenantSort,setTenantSort]=useState('room');
-  const [payTenant,setPayTenant]=useState(null); // 수납관리 열린 임차인
+export default function App() {
+  const [admin, setAdmin] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [tenants, setTenants] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [loans, setLoans] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [loanPayments, setLoanPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [editItem, setEditItem] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(thisMonth());
+  const [tenantSort, setTenantSort] = useState('room');
+  const [payTenant, setPayTenant] = useState(null);
+  const [detailLoan, setDetailLoan] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  useEffect(()=>{if(admin)loadData();},[admin]);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => { if (admin) loadData(); }, [admin]);
+
+  useEffect(() => {
+    document.title = 'EPIDENCE 올인스페이스 | 임대관리시스템';
+    
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = LOGO_BASE64;
+    
+    let appleLink = document.querySelector("link[rel~='apple-touch-icon']");
+    if (!appleLink) { appleLink = document.createElement('link'); appleLink.rel = 'apple-touch-icon'; document.head.appendChild(appleLink); }
+    appleLink.href = LOGO_BASE64;
+    
+    let metaTheme = document.querySelector("meta[name='theme-color']");
+    if (!metaTheme) { metaTheme = document.createElement('meta'); metaTheme.name = 'theme-color'; document.head.appendChild(metaTheme); }
+    metaTheme.content = '#2c3e50';
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [t,e,l,ec,a,p]=await Promise.all([
+      const [t, e, l, ec, a, p, lp] = await Promise.all([
         sb.from('tenants').select('*').order('room'),
-        sb.from('expenses').select('*').order('date',{ascending:false}),
+        sb.from('expenses').select('*').order('date', { ascending: false }),
         sb.from('loans').select('*').order('lender_name'),
         sb.from('expense_categories').select('*').order('name'),
         sb.from('admins').select('id,name,role,active').order('name'),
-        sb.from('payments').select('*').order('paid_at',{ascending:false})
+        sb.from('payments').select('*').order('paid_at', { ascending: false }),
+        sb.from('loan_payments').select('*').order('payment_date', { ascending: false })
       ]);
-      setTenants(t.data||[]);
-      setExpenses(e.data||[]);
-      setLoans(l.data||[]);
-      setExpenseCategories(ec.data||[]);
-      setAdmins(a.data||[]);
-      setPayments(p.data||[]);
-    } catch(err){console.error(err);}
-    finally{setLoading(false);}
+      setTenants(t.data || []); setExpenses(e.data || []);
+      setLoans(l.data || []); setExpenseCategories(ec.data || []);
+      setAdmins(a.data || []); setPayments(p.data || []);
+      setLoanPayments(lp.data || []);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
   const loadPayments = async () => {
-    const {data}=await sb.from('payments').select('*').order('paid_at',{ascending:false});
-    setPayments(data||[]);
+    const { data } = await sb.from('payments').select('*').order('paid_at', { ascending: false });
+    setPayments(data || []);
   };
 
-  const openModal=(type,item=null)=>{
+  const openModal = (type, item = null) => {
     setModalType(type); setEditItem(item);
-    const defaults={
-      tenant:{name:'',room:'',contact:'',deposit:0,monthly_rent:0,maintenance_fee:0,payment_day:5,move_in_date:'',contract_end:'',status:'active'},
-      expense:{date:new Date().toISOString().split('T')[0],category_name:'',amount:0,description:''},
-      loan:{lender_name:'',initial_amount:0,remaining_amount:0,final_rate:0,start_date:'',loan_type:'bank',status:'active',note:''},
-      admin:{name:'',passcode:'',role:'admin',active:true}
+    const d = {
+      tenant: { name: '', room: '', contact: '', deposit: 0, monthly_rent: 0, maintenance_fee: 0, payment_day: 5, move_in_date: '', contract_end: '' },
+      expense: { date: new Date().toISOString().split('T')[0], category_name: '', amount: 0, description: '' },
+      loan: { lender_name: '', remaining_amount: 0, initial_amount: 0, final_rate: 0, start_date: '', loan_type: 'bank', note: '' },
+      admin: { name: '', passcode: '', role: 'admin', active: true }
     };
-    setFormData(item?{...item}:defaults[type]);
+    setFormData(item ? { ...item } : d[type]);
     setShowModal(true);
   };
 
-  const saveData=async(e)=>{
+  const saveData = async e => {
     e.preventDefault();
-    const tables={tenant:'tenants',expense:'expenses',loan:'loans',admin:'admins'};
-    try{
-      if(editItem){await sb.from(tables[modalType]).update(formData).eq('id',editItem.id);}
-      else{await sb.from(tables[modalType]).insert([formData]);}
+    const tables = { tenant: 'tenants', expense: 'expenses', loan: 'loans', admin: 'admins' };
+    try {
+      let dataToSave = { ...formData };
+      if (modalType === 'loan' && !editItem) {
+        dataToSave.initial_amount = dataToSave.remaining_amount;
+      }
+      if (editItem) { await sb.from(tables[modalType]).update(dataToSave).eq('id', editItem.id); }
+      else { await sb.from(tables[modalType]).insert([dataToSave]); }
       await loadData(); setShowModal(false); setFormData({}); setEditItem(null);
-    }catch(err){alert('저장 실패: '+err.message);}
+    } catch (err) { alert('실패: ' + err.message); }
   };
 
-  const deleteItem=async(table,id)=>{
-    if(!window.confirm('정말 삭제하시겠습니까?'))return;
-    await sb.from(table).delete().eq('id',id);
+  const deleteItem = async (table, id) => {
+    if (!window.confirm('삭제?')) return;
+    await sb.from(table).delete().eq('id', id);
     await loadData();
   };
 
-  if(!admin) return <LoginScreen onLogin={setAdmin}/>;
+  const exportToExcel = () => {
+    const year = new Date(selectedMonth).getFullYear();
+    const workbook = XLSX.utils.book_new();
 
-  // 통계
-  const curExp=expenses.filter(e=>e.date?.startsWith(selectedMonth));
-  const totalExp=curExp.reduce((s,e)=>s+(e.amount||0),0);
-  // 대시보드 수익은 실제 수납된 금액 기준
-  const curPayments=payments.filter(p=>p.year_month===selectedMonth);
-  const totalRev=curPayments.reduce((s,p)=>s+(p.amount||0),0);
-  const totalLoan=loans.reduce((s,l)=>s+(l.remaining_amount||0),0);
-  const totalMInt=loans.reduce((s,l)=>s+((l.remaining_amount*l.final_rate)/12),0);
-  const profit=totalRev-totalExp;
-  const byCat=curExp.reduce((acc,e)=>{acc[e.category_name||'기타']=(acc[e.category_name||'기타']||0)+e.amount;return acc;},{});
-  const totalDep=tenants.reduce((s,t)=>s+(t.deposit||0),0);
-  const totalRent=tenants.reduce((s,t)=>s+(t.monthly_rent||0),0);
-  const totalFee=tenants.reduce((s,t)=>s+(t.maintenance_fee||0),0);
-  const sortedTenants=[...tenants].sort((a,b)=>tenantSort==='room'?(a.room||'').localeCompare(b.room||'','ko'):(a.payment_day||0)-(b.payment_day||0));
+    // 1. 임차인 시트
+    const tenantsData = tenants.map(t => ({
+      '호수': t.room,
+      '이름': t.name,
+      '연락처': t.contact,
+      '보증금': t.deposit,
+      '월세': t.monthly_rent,
+      '관리비': t.maintenance_fee,
+      '납입일': t.payment_day,
+      '입주일': t.move_in_date,
+      '계약만료일': t.contract_end
+    }));
+    const tenantsSheet = XLSX.utils.json_to_sheet(tenantsData);
+    XLSX.utils.book_append_sheet(workbook, tenantsSheet, '임차인');
 
-  // 이번달 미납 현황
-  const curMonthStr=selectedMonth;
-  const unpaidRent=tenants.filter(t=>!payments.some(p=>p.tenant_id===t.id&&p.year_month===curMonthStr&&p.type==='rent'));
-  const unpaidFee=tenants.filter(t=>!payments.some(p=>p.tenant_id===t.id&&p.year_month===curMonthStr&&p.type==='fee'));
+    // 2. 수납내역 시트 (월별)
+    const paymentsData = [];
+    for (let i = 1; i <= 12; i++) {
+      const month = String(i).padStart(2, '0');
+      const ym = `${year}-${month}`;
+      const monthPays = payments.filter(p => p.year_month === ym);
+      monthPays.forEach(p => {
+        const tenant = tenants.find(t => t.id === p.tenant_id);
+        paymentsData.push({
+          '월': `${i}월`,
+          '호수': tenant?.room || '',
+          '이름': tenant?.name || '',
+          '유형': p.type === 'rent' ? '월세' : p.type === 'fee' ? '관리비' : '기타',
+          '금액': p.amount,
+          '메모': p.note || '',
+          '수납일': p.paid_at?.split('T')[0] || ''
+        });
+      });
+    }
+    const paymentsSheet = XLSX.utils.json_to_sheet(paymentsData);
+    XLSX.utils.book_append_sheet(workbook, paymentsSheet, '수납내역');
 
-  const tabs=[
-    {id:'dashboard',icon:'📊',label:'대시보드'},
-    {id:'tenants',icon:'👥',label:'임차인'},
-    {id:'expenses',icon:'💸',label:'지출'},
-    {id:'loans',icon:'🏦',label:'대출'},
-    {id:'admins',icon:'⚙️',label:'관리자'}
+    // 3. 지출내역 시트 (월별)
+    const expensesData = expenses
+      .filter(e => e.date?.startsWith(year.toString()))
+      .map(e => ({
+        '월': `${new Date(e.date).getMonth() + 1}월`,
+        '날짜': e.date,
+        '카테고리': e.category_name,
+        '금액': e.amount,
+        '설명': e.description || ''
+      }));
+    const expensesSheet = XLSX.utils.json_to_sheet(expensesData);
+    XLSX.utils.book_append_sheet(workbook, expensesSheet, '지출내역');
+
+    // 4. 대출내역 시트
+    const loansData = loans.map(l => {
+      const lp = loanPayments.filter(p => p.loan_id === l.id);
+      const totalPaid = lp.reduce((s, p) => s + (p.amount || 0), 0);
+      const currentBalance = (l.initial_amount || l.remaining_amount || 0) - totalPaid;
+      return {
+        '대출처': l.lender_name,
+        '초기금액': l.initial_amount || l.remaining_amount,
+        '상환액': totalPaid,
+        '현재잔액': currentBalance,
+        '금리': `${((l.final_rate || 0) * 100).toFixed(2)}%`,
+        '연이자': Math.round(currentBalance * (l.final_rate || 0)),
+        '월이자': Math.round((currentBalance * (l.final_rate || 0)) / 12)
+      };
+    });
+    const loansSheet = XLSX.utils.json_to_sheet(loansData);
+    XLSX.utils.book_append_sheet(workbook, loansSheet, '대출내역');
+
+    // 5. 대출 상환내역 시트
+    const loanPaymentsData = loanPayments
+      .filter(lp => {
+        const loan = loans.find(l => l.id === lp.loan_id);
+        return loan && lp.payment_date?.startsWith(year.toString());
+      })
+      .map(lp => {
+        const loan = loans.find(l => l.id === lp.loan_id);
+        return {
+          '월': `${new Date(lp.payment_date).getMonth() + 1}월`,
+          '대출처': loan?.lender_name || '',
+          '상환일': lp.payment_date,
+          '상환액': lp.amount,
+          '메모': lp.note || ''
+        };
+      });
+    const loanPaymentsSheet = XLSX.utils.json_to_sheet(loanPaymentsData);
+    XLSX.utils.book_append_sheet(workbook, loanPaymentsSheet, '대출상환내역');
+
+    // 6. 월별요약 시트
+    const summaryData = [];
+    let yearRevenue = 0, yearExpense = 0;
+    for (let i = 1; i <= 12; i++) {
+      const month = String(i).padStart(2, '0');
+      const ym = `${year}-${month}`;
+      const monthPays = payments.filter(p => p.year_month === ym);
+      const monthExp = expenses.filter(e => e.date?.startsWith(ym));
+      const revenue = monthPays.reduce((s, p) => s + (p.amount || 0), 0);
+      const expense = monthExp.reduce((s, e) => s + (e.amount || 0), 0);
+      const netProfit = revenue - expense;
+      yearRevenue += revenue;
+      yearExpense += expense;
+      summaryData.push({
+        '월': `${i}월`,
+        '수익': revenue,
+        '지출': expense,
+        '순익': netProfit,
+        '월세수납': monthPays.filter(p => p.type === 'rent').reduce((s, p) => s + p.amount, 0),
+        '관리비수납': monthPays.filter(p => p.type === 'fee').reduce((s, p) => s + p.amount, 0),
+        '기타수납': monthPays.filter(p => p.type === 'other').reduce((s, p) => s + p.amount, 0)
+      });
+    }
+    summaryData.push({
+      '월': '합계',
+      '수익': yearRevenue,
+      '지출': yearExpense,
+      '순익': yearRevenue - yearExpense,
+      '월세수납': summaryData.reduce((s, d) => s + (d['월세수납'] || 0), 0),
+      '관리비수납': summaryData.reduce((s, d) => s + (d['관리비수납'] || 0), 0),
+      '기타수납': summaryData.reduce((s, d) => s + (d['기타수납'] || 0), 0)
+    });
+    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, '월별요약');
+
+    // 파일 다운로드
+    XLSX.writeFile(workbook, `올인스페이스_${year}년_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+
+  if (!admin) return (
+    <>
+      <style>{css}</style>
+      <LoginScreen onLogin={setAdmin} />
+    </>
+  );
+
+  const curExp = expenses.filter(e => e.date?.startsWith(selectedMonth));
+  const totalExp = curExp.reduce((s, e) => s + (e.amount || 0), 0);
+  const curPays = payments.filter(p => p.year_month === selectedMonth);
+  const totalRev = curPays.reduce((s, p) => s + (p.amount || 0), 0);
+  const totalLoan = loans.reduce((s, l) => {
+    const lp = loanPayments.filter(p => p.loan_id === l.id);
+    const totalPaid = lp.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const currentBalance = (l.initial_amount || l.remaining_amount || 0) - totalPaid;
+    return s + currentBalance;
+  }, 0);
+  const totalMInt = loans.reduce((s, l) => {
+    const lp = loanPayments.filter(p => p.loan_id === l.id);
+    const totalPaid = lp.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const currentBalance = (l.initial_amount || l.remaining_amount || 0) - totalPaid;
+    return s + ((currentBalance * l.final_rate) / 12);
+  }, 0);
+  const profit = totalRev - totalExp;
+  const byCat = curExp.reduce((acc, e) => { acc[e.category_name || '기타'] = (acc[e.category_name || '기타'] || 0) + e.amount; return acc; }, {});
+  const totalDep = tenants.reduce((s, t) => s + (t.deposit || 0), 0);
+  const totalRent = tenants.reduce((s, t) => s + (t.monthly_rent || 0), 0);
+  const totalFee = tenants.reduce((s, t) => s + (t.maintenance_fee || 0), 0);
+  const sortedTenants = [...tenants].sort((a, b) => tenantSort === 'room' ? (a.room || '').localeCompare(b.room || '', 'ko') : (a.payment_day || 0) - (b.payment_day || 0));
+  const unpaidRent = tenants.filter(t => !payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'rent'));
+  const unpaidFee = tenants.filter(t => !payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'fee'));
+
+  const tabs = [
+    { id: 'dashboard', icon: '📊', label: '대시보드' },
+    { id: 'tenants', icon: '👥', label: '임차인' },
+    { id: 'expenses', icon: '💸', label: '지출' },
+    { id: 'loans', icon: '🏦', label: '대출' },
+    { id: 'admins', icon: '⚙️', label: '관리자' }
   ];
-  const s={input:{width:'100%',padding:'12px',border:'2px solid #ecf0f1',borderRadius:'8px',fontSize:'15px',marginBottom:'12px'},label:{display:'block',marginBottom:'6px',fontSize:'13px',fontWeight:'bold',color:'#2c3e50'}};
+
+  const inp = { width: '100%', padding: '10px', border: '2px solid #ecf0f1', borderRadius: '6px', fontSize: '14px', marginBottom: '10px' };
+  const lbl = { display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 'bold', color: '#2c3e50' };
 
   return (
-    <div style={{display:'flex',minHeight:'100vh'}}>
-      {/* 사이드바 */}
-      <div id="sidebar" style={{width:'240px',background:'#2c3e50',color:'white',padding:'20px',position:'fixed',height:'100vh',overflowY:'auto',zIndex:100}}>
-        <div style={{marginBottom:'8px'}}>
-          <div style={{fontSize:'20px',fontWeight:'bold'}}>🏢 올인스페이스</div>
-          <div style={{fontSize:'12px',color:'#7f8c8d',marginTop:'4px'}}>👤 {admin.name}</div>
-        </div>
-        <hr style={{borderColor:'#34495e',margin:'14px 0'}}/>
-        <nav>
-          {tabs.map(({id,icon,label})=>(
-            <button key={id} onClick={()=>setActiveTab(id)} style={{display:'flex',alignItems:'center',gap:'10px',width:'100%',padding:'12px 14px',marginBottom:'6px',background:activeTab===id?'#3498db':'transparent',color:'white',border:'none',borderRadius:'8px',cursor:'pointer',fontSize:'15px',textAlign:'left',transition:'background 0.2s'}}>
+    <>
+      <style>{css}</style>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+
+        {/* PC 사이드바 */}
+        <div id="sidebar" style={{ width: '220px', background: '#2c3e50', color: 'white', padding: '18px', position: 'fixed', height: '100vh', overflowY: 'auto', zIndex: 100 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'white', borderRadius: '8px', padding: '4px' }}>
+              <img src={LOGO_BASE64} alt="EPIDENCE" style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain'
+              }} />
+            </div>
+            <div>
+              <div style={{ fontSize: '15px', fontWeight: 'bold', letterSpacing: '1px' }}>EPIDENCE</div>
+              <div style={{ fontSize: '10px', color: '#95a5a6' }}>올인스페이스</div>
+            </div>
+          </div>
+          <div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '14px' }}>👤 {admin.name}</div>
+          <hr style={{ borderColor: '#34495e', marginBottom: '12px' }} />
+          {tabs.map(({ id, icon, label }) => (
+            <button key={id} onClick={() => setActiveTab(id)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', marginBottom: '5px', background: activeTab === id ? '#3498db' : 'transparent', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', textAlign: 'left' }}>
               <span>{icon}</span><span>{label}</span>
             </button>
           ))}
-        </nav>
-        <div style={{position:'absolute',bottom:'20px',left:'20px',right:'20px'}}>
-          <div style={{padding:'10px',background:'#27ae60',borderRadius:'8px',fontSize:'12px',textAlign:'center',marginBottom:'8px'}}>☁️ 클라우드 연결</div>
-          <button onClick={()=>setAdmin(null)} style={{width:'100%',padding:'10px',background:'#e74c3c',color:'white',border:'none',borderRadius:'8px',cursor:'pointer',fontSize:'13px',fontWeight:'bold'}}>🚪 로그아웃</button>
+          <div style={{ marginTop: '16px', padding: '8px', background: '#27ae60', borderRadius: '6px', fontSize: '11px', textAlign: 'center', marginBottom: '6px' }}>☁️ 클라우드 연결</div>
+          <button onClick={() => setAdmin(null)} style={{ width: '100%', padding: '8px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>🚪 로그아웃</button>
         </div>
-      </div>
 
-      {/* 메인 */}
-      <div id="main" style={{flex:1,marginLeft:'240px',padding:'28px',maxWidth:'100%'}}>
-        {loading&&<div style={{textAlign:'center',padding:'60px',color:'#7f8c8d',fontSize:'18px'}}>로딩중...</div>}
+        {/* 메인 컨텐츠 */}
+        <div id="main" style={{ flex: 1, marginLeft: '220px', padding: '24px' }}>
+          {loading && <div style={{ textAlign: 'center', padding: '50px', color: '#7f8c8d' }}>로딩중...</div>}
 
-        {/* ── 대시보드 ── */}
-        {!loading&&activeTab==='dashboard'&&(
-          <div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'18px',flexWrap:'wrap',gap:'10px'}}>
-              <h2 style={{fontSize:'26px',color:'#2c3e50',fontWeight:'bold'}}>📊 대시보드</h2>
-              <input type="month" value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value)} style={{padding:'8px 14px',fontSize:'15px',borderRadius:'8px',border:'2px solid #3498db'}}/>
-            </div>
-            <div className="stat-grid" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'12px',marginBottom:'20px'}}>
-              {[
-                {label:'실 수납수익',val:fMan(totalRev),color:'#27ae60'},
-                {label:'월 지출',val:fMan(totalExp),color:'#e74c3c'},
-                {label:'순익',val:fMan(profit),color:profit>=0?'#3498db':'#e74c3c'},
-                {label:'대출잔액',val:fUk(totalLoan),color:'#c0392b'},
-                {label:'월 이자',val:fMan(totalMInt),color:'#e67e22'}
-              ].map(({label,val,color})=>(
-                <div key={label} className="card" style={{padding:'16px',borderTop:`4px solid ${color}`}}>
-                  <div style={{fontSize:'11px',color:'#7f8c8d',marginBottom:'6px'}}>{label}</div>
-                  <div style={{fontSize:'18px',fontWeight:'bold',color}}>{val}</div>
+          {/* 대시보드 */}
+          {!loading && activeTab === 'dashboard' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                <h2 style={{ fontSize: '22px', color: '#2c3e50', fontWeight: 'bold' }}>📊 대시보드</h2>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ padding: '7px 12px', fontSize: '13px', borderRadius: '6px', border: '2px solid #3498db' }} />
+                  <button onClick={exportToExcel} className="btn" style={{ padding: '9px 16px', background: '#27ae60', color: 'white', whiteSpace: 'nowrap' }}>📥 엑셀 다운로드</button>
                 </div>
-              ))}
-            </div>
-            {/* 미납 현황 */}
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'14px',marginBottom:'18px'}}>
-              <div className="card" style={{padding:'18px',borderLeft:'5px solid #e74c3c'}}>
-                <div style={{fontSize:'14px',fontWeight:'bold',color:'#e74c3c',marginBottom:'10px'}}>⚠️ 이번달 월세 미납 ({unpaidRent.length}건)</div>
-                {unpaidRent.length===0?<p style={{color:'#27ae60',fontSize:'14px'}}>✅ 전원 수납완료!</p>:
-                  unpaidRent.map(t=>(
-                    <div key={t.id} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid #f5f5f5',fontSize:'14px'}}>
-                      <span style={{fontWeight:'bold',color:'#3498db'}}>{t.room} {t.name}</span>
-                      <span style={{color:'#e74c3c'}}>{fNum(t.monthly_rent)}원</span>
-                    </div>
-                  ))
-                }
               </div>
-              <div className="card" style={{padding:'18px',borderLeft:'5px solid #e67e22'}}>
-                <div style={{fontSize:'14px',fontWeight:'bold',color:'#e67e22',marginBottom:'10px'}}>⚠️ 이번달 관리비 미납 ({unpaidFee.length}건)</div>
-                {unpaidFee.length===0?<p style={{color:'#27ae60',fontSize:'14px'}}>✅ 전원 수납완료!</p>:
-                  unpaidFee.map(t=>(
-                    <div key={t.id} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid #f5f5f5',fontSize:'14px'}}>
-                      <span style={{fontWeight:'bold',color:'#3498db'}}>{t.room} {t.name}</span>
-                      <span style={{color:'#e67e22'}}>{fNum(t.maintenance_fee)}원</span>
-                    </div>
-                  ))
-                }
-              </div>
-            </div>
-            <div className="card" style={{padding:'18px'}}>
-              <h3 style={{fontSize:'15px',marginBottom:'14px',color:'#2c3e50'}}>💸 카테고리별 지출 ({selectedMonth})</h3>
-              {Object.keys(byCat).length===0?<p style={{color:'#95a5a6',fontSize:'14px'}}>이번 달 지출이 없습니다</p>:
-                Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>(
-                  <div key={cat} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid #f5f5f5'}}>
-                    <span style={{color:'#2c3e50',fontSize:'14px'}}>{cat}</span>
-                    <strong style={{color:'#e74c3c',fontSize:'14px'}}>{fMan(amt)}</strong>
+              <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '10px', marginBottom: '14px' }}>
+                {[
+                  { label: '실수납', val: fMan(totalRev), color: '#27ae60' },
+                  { label: '지출', val: fMan(totalExp), color: '#e74c3c' },
+                  { label: '순익', val: fMan(profit), color: profit >= 0 ? '#3498db' : '#e74c3c' },
+                  { label: '대출', val: fUk(totalLoan), color: '#c0392b' },
+                  { label: '월이자', val: fMan(totalMInt), color: '#e67e22' }
+                ].map(({ label, val, color }) => (
+                  <div key={label} className="card stat-card" style={{ padding: '14px', borderTop: `3px solid ${color}` }}>
+                    <div className="stat-card-label" style={{ fontSize: '10px', color: '#7f8c8d', marginBottom: '4px' }}>{label}</div>
+                    <div className="stat-card-value" style={{ fontSize: '16px', fontWeight: 'bold', color }}>{val}</div>
                   </div>
-                ))
-              }
-            </div>
-          </div>
-        )}
-
-        {/* ── 임차인 ── */}
-        {!loading&&activeTab==='tenants'&&(
-          <div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'18px',flexWrap:'wrap',gap:'10px'}}>
-              <h2 style={{fontSize:'26px',color:'#2c3e50',fontWeight:'bold'}}>👥 임차인 관리</h2>
-              <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-                <input type="month" value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value)} style={{padding:'8px 12px',fontSize:'14px',borderRadius:'8px',border:'2px solid #27ae60'}}/>
-                <button className="btn" onClick={()=>openModal('tenant')} style={{padding:'11px 20px',background:'#27ae60',color:'white',fontSize:'14px'}}>+ 새 임차인</button>
+                ))}
               </div>
-            </div>
-            {/* 합계 */}
-            <div className="stat-grid" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'10px',marginBottom:'16px'}}>
-              {[
-                {label:'총 임차인',val:`${tenants.length}명`,color:'#3498db'},
-                {label:'보증금 합계',val:`${(totalDep/100000000).toFixed(1)}억`,color:'#9b59b6'},
-                {label:'월세 합계',val:fMan(totalRent),color:'#27ae60'},
-                {label:'관리비 합계',val:fMan(totalFee),color:'#e67e22'},
-                {label:'월 총수입',val:fMan(totalRent+totalFee),color:'#e74c3c'}
-              ].map(({label,val,color})=>(
-                <div key={label} className="card" style={{padding:'14px',borderLeft:`5px solid ${color}`}}>
-                  <div style={{fontSize:'11px',color:'#7f8c8d',marginBottom:'4px'}}>{label}</div>
-                  <div style={{fontSize:'16px',fontWeight:'bold',color}}>{val}</div>
-                </div>
-              ))}
-            </div>
-            {/* 정렬 */}
-            <div style={{display:'flex',gap:'8px',marginBottom:'12px',alignItems:'center'}}>
-              <span style={{fontSize:'13px',color:'#7f8c8d',fontWeight:'bold'}}>정렬:</span>
-              {[{k:'room',l:'🏠 호수순'},{k:'payment_day',l:'📅 납입일순'}].map(({k,l})=>(
-                <button key={k} onClick={()=>setTenantSort(k)} style={{padding:'7px 14px',background:tenantSort===k?'#2c3e50':'white',color:tenantSort===k?'white':'#2c3e50',border:'2px solid #2c3e50',borderRadius:'8px',cursor:'pointer',fontSize:'13px',fontWeight:'bold'}}>
-                  {l}
-                </button>
-              ))}
-            </div>
-            {tenants.length===0?(
-              <div className="card" style={{padding:'60px',textAlign:'center',color:'#95a5a6'}}>
-                <div style={{fontSize:'48px',marginBottom:'12px'}}>📝</div><p>등록된 임차인이 없습니다</p>
-              </div>
-            ):(
-              <div className="card" style={{overflow:'auto'}}>
-                <table style={{width:'100%',borderCollapse:'collapse',minWidth:'720px'}}>
-                  <thead style={{background:'#34495e',color:'white'}}>
-                    <tr>
-                      {['호수','이름','연락처','보증금','월세','관리비','납입일',`${selectedMonth} 수납현황`,'관리'].map(h=>(
-                        <th key={h} style={{padding:'13px 10px',textAlign:'left',fontSize:'13px'}}>{h}</th>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(250px,1fr))', gap: '10px', marginBottom: '12px' }}>
+                {[{ title: '⚠️ 월세 미납', list: unpaidRent, key: 'monthly_rent', color: '#e74c3c' }, { title: '⚠️ 관리비 미납', list: unpaidFee, key: 'maintenance_fee', color: '#e67e22' }].map(({ title, list, key, color }) => (
+                  <div key={title} className="card" style={{ padding: '14px', borderLeft: `4px solid ${color}` }}>
+                    <div style={{ fontSize: '13px', fontWeight: 'bold', color, marginBottom: '8px' }}>{title} ({list.length})</div>
+                    {list.length === 0 ? <p style={{ color: '#27ae60', fontSize: '12px' }}>✅ 전원 수납완료!</p> :
+                      list.slice(0, 3).map(t => (
+                        <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #f5f5f5', fontSize: '12px' }}>
+                          <span style={{ fontWeight: 'bold', color: '#3498db', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '8px' }}>{t.room} {t.name}</span>
+                          <span style={{ color, flexShrink: 0 }}>{fMan(t[key])}</span>
+                        </div>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedTenants.map((t,i)=>{
-                      const rentPaid=payments.some(p=>p.tenant_id===t.id&&p.year_month===selectedMonth&&p.type==='rent');
-                      const feePaid=payments.some(p=>p.tenant_id===t.id&&p.year_month===selectedMonth&&p.type==='fee');
+                    {list.length > 3 && <div style={{ fontSize: '11px', color: '#95a5a6', marginTop: '4px' }}>외 {list.length - 3}건</div>}
+                  </div>
+                ))}
+              </div>
+              <div className="card" style={{ padding: '14px' }}>
+                <h3 style={{ fontSize: '14px', marginBottom: '10px', color: '#2c3e50' }}>💸 카테고리별 지출</h3>
+                {Object.keys(byCat).length === 0 ? <p style={{ color: '#95a5a6', fontSize: '12px' }}>지출 없음</p> :
+                  Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([cat, amt]) => (
+                    <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f5f5f5' }}>
+                      <span style={{ fontSize: '12px', color: '#2c3e50' }}>{cat}</span>
+                      <strong style={{ color: '#e74c3c', fontSize: '12px' }}>{fMan(amt)}</strong>
+                    </div>
+                  ))}
+              </div>
+              
+              {/* 월별 추세 */}
+              <div className="card" style={{ padding: '14px', marginTop: '12px' }}>
+                <h3 style={{ fontSize: '14px', marginBottom: '10px', color: '#2c3e50' }}>📈 월별 추세 ({new Date(selectedMonth).getFullYear()}년)</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '300px' }}>
+                    <thead>
+                      <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #ecf0f1' }}>
+                        <th style={{ padding: '8px 4px', textAlign: 'left', fontSize: '11px', color: '#7f8c8d' }}>월</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>수익</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>지출</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>순익</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const month = String(i + 1).padStart(2, '0');
+                        const ym = `${new Date(selectedMonth).getFullYear()}-${month}`;
+                        const monthPays = payments.filter(p => p.year_month === ym);
+                        const monthExp = expenses.filter(e => e.date?.startsWith(ym));
+                        const revenue = monthPays.reduce((s, p) => s + (p.amount || 0), 0);
+                        const expense = monthExp.reduce((s, e) => s + (e.amount || 0), 0);
+                        const netProfit = revenue - expense;
+                        const isCurrentMonth = ym === selectedMonth;
+                        return (
+                          <tr key={month} style={{ borderBottom: '1px solid #f5f5f5', background: isCurrentMonth ? '#e3f2fd' : 'white' }}>
+                            <td style={{ padding: '8px 4px', fontSize: '12px', fontWeight: isCurrentMonth ? 'bold' : 'normal', color: isCurrentMonth ? '#2196f3' : '#2c3e50' }}>{parseInt(month)}월</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', color: '#27ae60', fontWeight: revenue > 0 ? 'bold' : 'normal' }}>{revenue > 0 ? fMan(revenue) : '-'}</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', color: '#e74c3c', fontWeight: expense > 0 ? 'bold' : 'normal' }}>{expense > 0 ? fMan(expense) : '-'}</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', fontWeight: 'bold', color: netProfit > 0 ? '#27ae60' : netProfit < 0 ? '#e74c3c' : '#95a5a6' }}>
+                              {netProfit !== 0 ? fMan(netProfit) : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      <tr style={{ background: '#f8f9fa', borderTop: '2px solid #ecf0f1', fontWeight: 'bold' }}>
+                        <td style={{ padding: '10px 4px', fontSize: '12px', color: '#2c3e50' }}>합계</td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: '#27ae60' }}>
+                          {fMan(payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0))}
+                        </td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: '#e74c3c' }}>
+                          {fMan(expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0))}
+                        </td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0) - expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0) >= 0 ? '#27ae60' : '#e74c3c' }}>
+                          {fMan(payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0) - expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+          {/* 임차인 탭 */}
+          {!loading && activeTab === 'tenants' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <h2 style={{ fontSize: '22px', color: '#2c3e50', fontWeight: 'bold' }}>👥 임차인</h2>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '2px solid #27ae60' }} />
+                  <button className="btn" onClick={() => openModal('tenant')} style={{ padding: '9px 16px', background: '#27ae60', color: 'white' }}>+ 추가</button>
+                </div>
+              </div>
+              
+              {/* 합계 */}
+              <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: '8px', marginBottom: '12px' }}>
+                {[
+                  { label: '총 임차인', val: `${tenants.length}명`, color: '#3498db' },
+                  { label: '월 총수입', val: fMan(totalRent + totalFee + curPays.filter(p => p.type === 'other').reduce((s, p) => s + p.amount, 0)), color: '#e74c3c' },
+                  { label: '보증금', val: fUk(totalDep), color: '#9b59b6' },
+                  { label: '월세', val: fMan(totalRent), color: '#27ae60' },
+                  { label: '관리비', val: fMan(totalFee), color: '#e67e22' },
+                  { label: '기타', val: fMan(curPays.filter(p => p.type === 'other').reduce((s, p) => s + p.amount, 0)), color: '#9b59b6' }
+                ].map(({ label, val, color }) => (
+                  <div key={label} className="card stat-card" style={{ padding: '10px', borderLeft: `4px solid ${color}` }}>
+                    <div className="stat-card-label" style={{ fontSize: '9px', color: '#7f8c8d', marginBottom: '3px' }}>{label}</div>
+                    <div className="stat-card-value" style={{ fontSize: '14px', fontWeight: 'bold', color }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 정렬 */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12px', color: '#7f8c8d', fontWeight: 'bold' }}>정렬:</span>
+                {[{ k: 'room', l: '🏠 호수순' }, { k: 'payment_day', l: '📅 납입일순' }].map(({ k, l }) => (
+                  <button key={k} onClick={() => setTenantSort(k)} style={{ padding: '6px 12px', background: tenantSort === k ? '#2c3e50' : 'white', color: tenantSort === k ? 'white' : '#2c3e50', border: '2px solid #2c3e50', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{l}</button>
+                ))}
+              </div>
+
+              {/* 데스크톱 테이블 */}
+              {!isMobile && (
+                <div className="card" style={{ overflow: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '750px' }}>
+                    <thead style={{ background: '#34495e', color: 'white' }}>
+                      <tr>{['관리', '호수', '이름', '연락처', '보증금', '월세', '관리비', '납입일', `${selectedMonth} 수납`].map(h => <th key={h} style={{ padding: '12px 10px', textAlign: 'left', fontSize: '12px' }}>{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                    {sortedTenants.map((t, i) => {
+                      const rp = payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'rent');
+                      const fp = payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'fee');
+                      const otherPays = payments.filter(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'other');
+                      const otherTotal = otherPays.reduce((s, p) => s + p.amount, 0);
                       return (
-                        <tr key={t.id} style={{borderBottom:'1px solid #f0f0f0',background:i%2===0?'white':'#fafafa'}}>
-                          <td style={{padding:'12px 10px',fontWeight:'bold',color:'#3498db'}}>{t.room}</td>
-                          <td style={{padding:'12px 10px'}}>{t.name}</td>
-                          <td style={{padding:'12px 10px',fontSize:'13px'}}>{t.contact}</td>
-                          <td style={{padding:'12px 10px',fontSize:'13px'}}>{fMan(t.deposit)}</td>
-                          <td style={{padding:'12px 10px',fontSize:'13px'}}>{fMan(t.monthly_rent)}</td>
-                          <td style={{padding:'12px 10px',fontSize:'13px'}}>{fMan(t.maintenance_fee)}</td>
-                          <td style={{padding:'12px 10px'}}><span style={{background:'#eaf4ff',color:'#3498db',padding:'3px 8px',borderRadius:'20px',fontSize:'12px',fontWeight:'bold'}}>매월 {t.payment_day}일</span></td>
-                          <td style={{padding:'12px 10px'}}>
-                            <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                              <span style={{background:rentPaid?'#d5f5e3':'#fdeaea',color:rentPaid?'#27ae60':'#e74c3c',padding:'3px 8px',borderRadius:'6px',fontSize:'12px',fontWeight:'bold'}}>
-                                {rentPaid?'✅월세':'❌월세'}
-                              </span>
-                              <span style={{background:feePaid?'#d5f5e3':'#fef3e2',color:feePaid?'#27ae60':'#e67e22',padding:'3px 8px',borderRadius:'6px',fontSize:'12px',fontWeight:'bold'}}>
-                                {feePaid?'✅관리비':'❌관리비'}
-                              </span>
+                        <tr key={t.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? 'white' : '#fafafa' }}>
+                          <td style={{ padding: '11px 10px' }}>
+                            <div style={{ display: 'flex', gap: '3px' }}>
+                              <button className="btn" onClick={() => setPayTenant(t)} style={{ padding: '6px 10px', background: '#27ae60', color: 'white', fontWeight: 'bold' }}>💰 수납</button>
+                              <button className="btn" onClick={() => openModal('tenant', t)} style={{ padding: '6px 10px', background: '#3498db', color: 'white' }}>수정</button>
                             </div>
                           </td>
-                          <td style={{padding:'12px 10px'}}>
-                            <div style={{display:'flex',gap:'4px',flexWrap:'wrap'}}>
-                              <button className="btn" onClick={()=>setPayTenant(t)} style={{padding:'6px 10px',background:'#27ae60',color:'white',fontSize:'12px'}}>💰 수납</button>
-                              <button className="btn" onClick={()=>openModal('tenant',t)} style={{padding:'6px 10px',background:'#3498db',color:'white',fontSize:'12px'}}>수정</button>
-                            </div>
+                          <td style={{ padding: '11px 10px', fontWeight: 'bold', color: '#3498db' }}>{t.room}</td>
+                          <td style={{ padding: '11px 10px' }}>{t.name}</td>
+                          <td style={{ padding: '11px 10px', fontSize: '12px' }}>
+                            {t.contact && t.contact !== '미등록' ? (
+                              <a href={`tel:${t.contact}`} style={{ color: '#3498db', textDecoration: 'none', fontWeight: 'bold' }}>
+                                📞 {t.contact}
+                              </a>
+                            ) : (
+                              <span style={{ color: '#95a5a6' }}>{t.contact || '미등록'}</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '11px 10px', fontSize: '12px' }}>{fMan(t.deposit)}</td>
+                          <td style={{ padding: '11px 10px', fontSize: '12px' }}>{fMan(t.monthly_rent)}</td>
+                          <td style={{ padding: '11px 10px', fontSize: '12px' }}>{fMan(t.maintenance_fee)}</td>
+                          <td style={{ padding: '11px 10px' }}><span style={{ background: '#eaf4ff', color: '#3498db', padding: '2px 7px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>매월 {t.payment_day}일</span></td>
+                          <td style={{ padding: '11px 10px' }}>
+                            {(() => {
+                              const allPaid = rp && fp;
+                              const noPaid = !rp && !fp;
+                              if (allPaid) {
+                                return (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ background: '#d5f5e3', color: '#27ae60', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>✅ 수납완료</span>
+                                    {otherTotal > 0 && <span style={{ background: '#f5f0ff', color: '#9b59b6', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>💜{fMan(otherTotal)}</span>}
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
+                                  <span style={{ background: rp ? '#d5f5e3' : '#fdeaea', color: rp ? '#27ae60' : '#e74c3c', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>{rp ? '✅월세' : '❌월세'}</span>
+                                  <span style={{ background: fp ? '#d5f5e3' : '#fef3e2', color: fp ? '#27ae60' : '#e67e22', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>{fp ? '✅관리비' : '❌관리비'}</span>
+                                  {otherTotal > 0 && <span style={{ background: '#f5f0ff', color: '#9b59b6', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>💜{fMan(otherTotal)}</span>}
+                                </div>
+                              );
+                            })()}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
-                  <tfoot>
-                    <tr style={{background:'#2c3e50',color:'white',fontWeight:'bold'}}>
-                      <td style={{padding:'13px 10px'}} colSpan="3">합계 ({tenants.length}명)</td>
-                      <td style={{padding:'13px 10px',fontSize:'13px'}}>{fMan(totalDep)}</td>
-                      <td style={{padding:'13px 10px',fontSize:'13px'}}>{fMan(totalRent)}</td>
-                      <td style={{padding:'13px 10px',fontSize:'13px'}}>{fMan(totalFee)}</td>
-                      <td style={{padding:'13px 10px'}} colSpan="3">월 총수입 {fMan(totalRent+totalFee)}</td>
-                    </tr>
-                  </tfoot>
                 </table>
               </div>
-            )}
-          </div>
-        )}
+              )}
 
-        {/* ── 지출 ── */}
-        {!loading&&activeTab==='expenses'&&(
-          <div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px',flexWrap:'wrap',gap:'10px'}}>
-              <h2 style={{fontSize:'26px',color:'#2c3e50',fontWeight:'bold'}}>💸 지출 관리</h2>
-              <div style={{display:'flex',gap:'10px',alignItems:'center',flexWrap:'wrap'}}>
-                <input type="month" value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value)} style={{padding:'8px 12px',fontSize:'14px',borderRadius:'8px',border:'2px solid #e74c3c'}}/>
-                <button className="btn" onClick={()=>openModal('expense')} style={{padding:'11px 20px',background:'#e74c3c',color:'white',fontSize:'14px'}}>+ 새 지출</button>
-              </div>
-            </div>
-            <div className="card" style={{padding:'18px',marginBottom:'14px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-              <div><div style={{fontSize:'12px',color:'#7f8c8d'}}>이번 달 총 지출</div><div style={{fontSize:'32px',fontWeight:'bold',color:'#e74c3c'}}>{fMan(totalExp)}</div></div>
-              <div style={{fontSize:'40px'}}>💸</div>
-            </div>
-            <div className="card" style={{overflow:'auto'}}>
-              <table style={{width:'100%',borderCollapse:'collapse',minWidth:'500px'}}>
-                <thead style={{background:'#e74c3c',color:'white'}}>
-                  <tr>{['날짜','카테고리','금액','설명','관리'].map(h=><th key={h} style={{padding:'12px 10px',textAlign:'left',fontSize:'13px'}}>{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {curExp.length===0?<tr><td colSpan="5" style={{padding:'40px',textAlign:'center',color:'#95a5a6'}}>이번 달 지출이 없습니다</td></tr>:
-                    curExp.map((exp,i)=>(
-                      <tr key={exp.id} style={{borderBottom:'1px solid #f0f0f0',background:i%2===0?'white':'#fff8f8'}}>
-                        <td style={{padding:'12px 10px',fontSize:'13px'}}>{exp.date}</td>
-                        <td style={{padding:'12px 10px'}}><span style={{background:'#fdeaea',color:'#e74c3c',padding:'3px 8px',borderRadius:'6px',fontSize:'12px'}}>{exp.category_name}</span></td>
-                        <td style={{padding:'12px 10px',fontWeight:'bold',color:'#e74c3c',fontSize:'14px'}}>{fNum(exp.amount)}원</td>
-                        <td style={{padding:'12px 10px',color:'#7f8c8d',fontSize:'13px'}}>{exp.description}</td>
-                        <td style={{padding:'12px 10px'}}>
-                          <button className="btn" onClick={()=>openModal('expense',exp)} style={{padding:'5px 9px',background:'#3498db',color:'white',fontSize:'12px',marginRight:'4px'}}>수정</button>
-                          <button className="btn" onClick={()=>deleteItem('expenses',exp.id)} style={{padding:'5px 9px',background:'#e74c3c',color:'white',fontSize:'12px'}}>삭제</button>
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ── 대출 ── */}
-        {!loading&&activeTab==='loans'&&(
-          <div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'18px',flexWrap:'wrap',gap:'10px'}}>
-              <h2 style={{fontSize:'26px',color:'#2c3e50',fontWeight:'bold'}}>🏦 대출 관리</h2>
-              <button className="btn" onClick={()=>openModal('loan')} style={{padding:'11px 20px',background:'#c0392b',color:'white',fontSize:'14px'}}>+ 새 대출</button>
-            </div>
-            <div className="stat-grid" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'12px',marginBottom:'18px'}}>
-              {[
-                {label:'총 대출잔액',val:fUk(totalLoan),color:'#c0392b'},
-                {label:'월 이자 합계',val:fMan(totalMInt),color:'#e67e22'},
-                {label:'연 이자 합계',val:fMan(totalMInt*12),color:'#f39c12'}
-              ].map(({label,val,color})=>(
-                <div key={label} className="card" style={{padding:'18px',borderLeft:`5px solid ${color}`}}>
-                  <div style={{fontSize:'12px',color:'#7f8c8d',marginBottom:'6px'}}>{label}</div>
-                  <div style={{fontSize:'22px',fontWeight:'bold',color}}>{val}</div>
-                </div>
-              ))}
-            </div>
-            {loans.length===0?(
-              <div className="card" style={{padding:'60px',textAlign:'center',color:'#95a5a6'}}><div style={{fontSize:'48px',marginBottom:'12px'}}>🏦</div><p>등록된 대출이 없습니다</p></div>
-            ):(
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'14px'}}>
-                {loans.map(loan=>{
-                  const yi=(loan.remaining_amount||0)*(loan.final_rate||0);
-                  const mi=yi/12;
+              {/* 모바일 카드 */}
+              {isMobile && (
+                <div>
+                {sortedTenants.length === 0 ? (
+                  <div className="card" style={{ padding: '40px', textAlign: 'center', color: '#95a5a6' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '10px' }}>📝</div>
+                    <p style={{ fontSize: '14px' }}>등록된 임차인 없음</p>
+                  </div>
+                ) : sortedTenants.map(t => {
+                  const rp = payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'rent');
+                  const fp = payments.some(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'fee');
+                  const otherPays = payments.filter(p => p.tenant_id === t.id && p.year_month === selectedMonth && p.type === 'other');
+                  const otherTotal = otherPays.reduce((s, p) => s + p.amount, 0);
+                  const allPaid = rp && fp;
+                  const borderColor = allPaid ? '#27ae60' : '#e74c3c';
                   return (
-                    <div key={loan.id} className="card" style={{overflow:'hidden'}}>
-                      <div style={{background:'#2c3e50',color:'white',padding:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                        <div><div style={{fontSize:'17px',fontWeight:'bold'}}>🏦 {loan.lender_name}</div><div style={{fontSize:'11px',opacity:0.7,marginTop:'2px'}}>{loan.loan_type==='bank'?'은행대출':loan.loan_type==='personal'?'개인차입':'기타'}</div></div>
-                        <div style={{display:'flex',gap:'6px'}}>
-                          <button className="btn" onClick={()=>openModal('loan',loan)} style={{padding:'6px 10px',background:'#3498db',color:'white',fontSize:'12px'}}>수정</button>
-                          <button className="btn" onClick={()=>deleteItem('loans',loan.id)} style={{padding:'6px 10px',background:'#e74c3c',color:'white',fontSize:'12px'}}>삭제</button>
+                    <div key={t.id} style={{ background: 'white', borderRadius: '10px', padding: '12px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderLeft: `4px solid ${borderColor}` }}>
+                      {/* 호수와 이름 + 수납 버튼 */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#3498db' }}>🏠 {t.room} {t.name}</div>
                         </div>
+                        <button onClick={() => setPayTenant(t)} style={{ padding: '6px 12px', background: '#27ae60', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', whiteSpace: 'nowrap', flexShrink: 0 }}>💰 수납</button>
                       </div>
-                      <div style={{padding:'18px'}}>
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'14px'}}>
-                          <div><div style={{fontSize:'11px',color:'#7f8c8d',marginBottom:'3px'}}>대출잔액</div><div style={{fontSize:'18px',fontWeight:'bold',color:'#c0392b'}}>{fUk(loan.remaining_amount)}</div><div style={{fontSize:'11px',color:'#95a5a6'}}>{fNum(loan.remaining_amount)}원</div></div>
-                          <div><div style={{fontSize:'11px',color:'#7f8c8d',marginBottom:'3px'}}>금리</div><div style={{fontSize:'18px',fontWeight:'bold',color:'#2c3e50'}}>{((loan.final_rate||0)*100).toFixed(2)}%</div></div>
-                        </div>
-                        <div style={{background:'#fef9f0',border:'2px solid #f39c12',borderRadius:'10px',padding:'12px'}}>
-                          <div style={{fontSize:'12px',fontWeight:'bold',color:'#2c3e50',marginBottom:'8px'}}>📊 이자 자동계산</div>
-                          <div style={{display:'flex',justifyContent:'space-between',marginBottom:'5px'}}><span style={{color:'#7f8c8d',fontSize:'12px'}}>연 이자</span><strong style={{color:'#e67e22',fontSize:'13px'}}>{fNum(yi)}원</strong></div>
-                          <div style={{display:'flex',justifyContent:'space-between'}}><span style={{color:'#7f8c8d',fontSize:'12px'}}>월 이자</span><strong style={{color:'#e74c3c',fontSize:'16px'}}>{fNum(mi)}원</strong></div>
-                        </div>
-                        {loan.note&&<div style={{marginTop:'8px',padding:'8px',background:'#f8f9fa',borderRadius:'8px',fontSize:'12px',color:'#7f8c8d'}}>📝 {loan.note}</div>}
+                      
+                      {/* 연락처 */}
+                      <div style={{ fontSize: '12px', marginBottom: '8px' }}>
+                        {t.contact && t.contact !== '미등록' ? (
+                          <a href={`tel:${t.contact}`} style={{ color: '#27ae60', textDecoration: 'none', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', background: '#e8f8f5', borderRadius: '6px' }}>
+                            📞 {t.contact}
+                          </a>
+                        ) : (
+                          <span style={{ color: '#95a5a6', fontSize: '11px' }}>📞 {t.contact || '미등록'}</span>
+                        )}
+                      </div>
+                      
+                      {/* 금액 정보 - 한 줄로 */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
+                        <span style={{ color: '#7f8c8d' }}>보증금 <strong style={{ color: '#9b59b6' }}>{fMan(t.deposit)}</strong></span>
+                        <span style={{ color: '#7f8c8d' }}>월세 <strong style={{ color: '#27ae60' }}>{fMan(t.monthly_rent)}</strong></span>
+                        <span style={{ color: '#7f8c8d' }}>관리비 <strong style={{ color: '#e67e22' }}>{fMan(t.maintenance_fee)}</strong></span>
+                      </div>
+                      
+                      {/* 납입일 */}
+                      <div style={{ fontSize: '11px', color: '#7f8c8d', marginBottom: '8px' }}>
+                        납입일: <span style={{ background: '#eaf4ff', color: '#3498db', padding: '2px 6px', borderRadius: '8px', fontWeight: 'bold' }}>매월 {t.payment_day}일</span>
+                      </div>
+                      
+                      {/* 수납 상태 */}
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {(() => {
+                          const allPaid = rp && fp;
+                          if (allPaid) {
+                            return (
+                              <>
+                                <span style={{ background: '#d5f5e3', color: '#27ae60', padding: '5px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>✅ 수납완료</span>
+                                {otherTotal > 0 && <span style={{ background: '#f5f0ff', color: '#9b59b6', padding: '3px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>💜기타 {fMan(otherTotal)}</span>}
+                              </>
+                            );
+                          }
+                          return (
+                            <>
+                              <span style={{ background: rp ? '#d5f5e3' : '#fdeaea', color: rp ? '#27ae60' : '#e74c3c', padding: '3px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{rp ? '✅월세' : '❌월세'}</span>
+                              <span style={{ background: fp ? '#d5f5e3' : '#fef3e2', color: fp ? '#27ae60' : '#e67e22', padding: '3px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{fp ? '✅관리비' : '❌관리비'}</span>
+                              {otherTotal > 0 && <span style={{ background: '#f5f0ff', color: '#9b59b6', padding: '3px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>💜기타 {fMan(otherTotal)}</span>}
+                            </>
+                          );
+                        })()}
+                        <button onClick={() => openModal('tenant', t)} style={{ marginLeft: 'auto', padding: '3px 8px', background: '#3498db', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}>✏️ 수정</button>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* ── 관리자 ── */}
-        {!loading&&activeTab==='admins'&&(
-          <div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'18px',flexWrap:'wrap',gap:'10px'}}>
-              <h2 style={{fontSize:'26px',color:'#2c3e50',fontWeight:'bold'}}>⚙️ 관리자 설정</h2>
-              <button className="btn" onClick={()=>openModal('admin')} style={{padding:'11px 20px',background:'#8e44ad',color:'white',fontSize:'14px'}}>+ 관리자 추가</button>
+              )}
             </div>
-            <div className="card" style={{overflow:'auto',marginBottom:'18px'}}>
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <thead style={{background:'#8e44ad',color:'white'}}>
-                  <tr>{['이름','비밀번호','권한','상태','관리'].map(h=><th key={h} style={{padding:'13px 14px',textAlign:'left',fontSize:'13px'}}>{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {admins.map((a,i)=>(
-                    <tr key={a.id} style={{borderBottom:'1px solid #f0f0f0',background:i%2===0?'white':'#fafafa'}}>
-                      <td style={{padding:'13px 14px',fontWeight:'bold'}}>👤 {a.name}</td>
-                      <td style={{padding:'13px 14px'}}><span style={{background:'#f0f0f0',padding:'4px 10px',borderRadius:'6px',fontFamily:'monospace'}}>••••</span></td>
-                      <td style={{padding:'13px 14px'}}><span style={{background:a.role==='super'?'#e74c3c':'#3498db',color:'white',padding:'3px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'bold'}}>{a.role==='super'?'최고관리자':'관리자'}</span></td>
-                      <td style={{padding:'13px 14px'}}><span style={{background:a.active?'#27ae60':'#95a5a6',color:'white',padding:'3px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'bold'}}>{a.active?'활성':'비활성'}</span></td>
-                      <td style={{padding:'13px 14px',display:'flex',gap:'6px'}}>
-                        <button className="btn" onClick={()=>openModal('admin',a)} style={{padding:'6px 10px',background:'#3498db',color:'white',fontSize:'12px'}}>수정</button>
-                        {a.id!==admin.id&&<button className="btn" onClick={()=>deleteItem('admins',a.id)} style={{padding:'6px 10px',background:'#e74c3c',color:'white',fontSize:'12px'}}>삭제</button>}
-                      </td>
-                    </tr>
+          )}
+
+
+          {/* 지출 탭 - 간략화 */}
+          {!loading && activeTab === 'expenses' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '6px' }}>
+                <h2 style={{ fontSize: '22px', color: '#2c3e50', fontWeight: 'bold' }}>💸 지출</h2>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '2px solid #e74c3c' }} />
+                  <button className="btn" onClick={() => openModal('expense')} style={{ padding: '9px 16px', background: '#e74c3c', color: 'white' }}>+ 추가</button>
+                </div>
+              </div>
+              <div className="card" style={{ padding: '16px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div><div style={{ fontSize: '11px', color: '#7f8c8d' }}>이번 달 총 지출</div><div style={{ fontSize: '26px', fontWeight: 'bold', color: '#e74c3c' }}>{fMan(totalExp)}</div></div>
+                <div style={{ fontSize: '36px' }}>💸</div>
+              </div>
+              <div className="card" style={{ padding: '12px' }}>
+                {curExp.length === 0 ? <p style={{ textAlign: 'center', color: '#95a5a6', padding: '20px', fontSize: '13px' }}>지출 내역 없음</p> :
+                  curExp.slice(0, 20).map((exp, i) => (
+                    <div key={exp.id} style={{ padding: '10px 0', borderBottom: i < curExp.length - 1 ? '1px solid #f5f5f5' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', color: '#2c3e50', fontWeight: 'bold', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exp.date} · {exp.category_name}</div>
+                        <div style={{ fontSize: '11px', color: '#7f8c8d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exp.description}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#e74c3c', whiteSpace: 'nowrap' }}>{fMan(exp.amount)}</div>
+                        <button className="btn" onClick={() => deleteItem('expenses', exp.id)} style={{ padding: '4px 6px', background: '#e74c3c', color: 'white' }}>삭제</button>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+              </div>
+              
+              {/* 월별 지출 추세 */}
+              <div className="card" style={{ padding: '14px', marginTop: '12px' }}>
+                <h3 style={{ fontSize: '14px', marginBottom: '10px', color: '#2c3e50' }}>📊 월별 지출/수익 추세 ({new Date(selectedMonth).getFullYear()}년)</h3>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '300px' }}>
+                    <thead>
+                      <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #ecf0f1' }}>
+                        <th style={{ padding: '8px 4px', textAlign: 'left', fontSize: '11px', color: '#7f8c8d' }}>월</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>수익</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>지출</th>
+                        <th style={{ padding: '8px 4px', textAlign: 'right', fontSize: '11px', color: '#7f8c8d' }}>순익</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const month = String(i + 1).padStart(2, '0');
+                        const ym = `${new Date(selectedMonth).getFullYear()}-${month}`;
+                        const monthPays = payments.filter(p => p.year_month === ym);
+                        const monthExp = expenses.filter(e => e.date?.startsWith(ym));
+                        const revenue = monthPays.reduce((s, p) => s + (p.amount || 0), 0);
+                        const expense = monthExp.reduce((s, e) => s + (e.amount || 0), 0);
+                        const netProfit = revenue - expense;
+                        const isCurrentMonth = ym === selectedMonth;
+                        return (
+                          <tr key={month} style={{ borderBottom: '1px solid #f5f5f5', background: isCurrentMonth ? '#fef3e2' : 'white' }}>
+                            <td style={{ padding: '8px 4px', fontSize: '12px', fontWeight: isCurrentMonth ? 'bold' : 'normal', color: isCurrentMonth ? '#e67e22' : '#2c3e50' }}>{parseInt(month)}월</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', color: '#27ae60', fontWeight: revenue > 0 ? 'bold' : 'normal' }}>{revenue > 0 ? fMan(revenue) : '-'}</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', color: '#e74c3c', fontWeight: expense > 0 ? 'bold' : 'normal' }}>{expense > 0 ? fMan(expense) : '-'}</td>
+                            <td style={{ padding: '8px 4px', textAlign: 'right', fontSize: '12px', fontWeight: 'bold', color: netProfit > 0 ? '#27ae60' : netProfit < 0 ? '#e74c3c' : '#95a5a6' }}>
+                              {netProfit !== 0 ? fMan(netProfit) : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      <tr style={{ background: '#f8f9fa', borderTop: '2px solid #ecf0f1', fontWeight: 'bold' }}>
+                        <td style={{ padding: '10px 4px', fontSize: '12px', color: '#2c3e50' }}>합계</td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: '#27ae60' }}>
+                          {fMan(payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0))}
+                        </td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: '#e74c3c' }}>
+                          {fMan(expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0))}
+                        </td>
+                        <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '13px', color: payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0) - expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0) >= 0 ? '#27ae60' : '#e74c3c' }}>
+                          {fMan(payments.filter(p => p.year_month?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, p) => s + (p.amount || 0), 0) - expenses.filter(e => e.date?.startsWith(new Date(selectedMonth).getFullYear().toString())).reduce((s, e) => s + (e.amount || 0), 0))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <div className="card" style={{padding:'18px',background:'#f0f8ff',border:'2px solid #3498db'}}>
-              <h3 style={{fontSize:'15px',color:'#2c3e50',marginBottom:'12px'}}>📱 앱 설치 방법</h3>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'10px'}}>
-                {[{icon:'🤖',title:'안드로이드',desc:'Chrome → 메뉴(⋮) → "홈 화면에 추가"'},
-                  {icon:'🍎',title:'아이폰',desc:'Safari → 공유(📤) → "홈 화면에 추가"'},
-                  {icon:'💻',title:'PC',desc:'Chrome → 주소창 오른쪽 ⊕ 클릭'}].map(({icon,title,desc})=>(
-                  <div key={title} style={{background:'white',padding:'12px',borderRadius:'10px'}}>
-                    <div style={{fontSize:'22px',marginBottom:'5px'}}>{icon}</div>
-                    <div style={{fontWeight:'bold',marginBottom:'3px',color:'#2c3e50',fontSize:'14px'}}>{title}</div>
-                    <div style={{fontSize:'12px',color:'#7f8c8d',lineHeight:'1.5'}}>{desc}</div>
+          )}
+
+          {/* 대출 탭 - 간략화 */}
+          {!loading && activeTab === 'loans' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h2 style={{ fontSize: '22px', color: '#2c3e50', fontWeight: 'bold' }}>🏦 대출</h2>
+                <button className="btn" onClick={() => openModal('loan')} style={{ padding: '9px 16px', background: '#c0392b', color: 'white' }}>+ 추가</button>
+              </div>
+              <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginBottom: '12px' }}>
+                {[{ label: '총 잔액', val: fUk(totalLoan), color: '#c0392b' }, { label: '월 이자', val: fMan(totalMInt), color: '#e67e22' }, { label: '연 이자', val: fMan(totalMInt * 12), color: '#f39c12' }].map(({ label, val, color }) => (
+                  <div key={label} className="card stat-card" style={{ padding: '14px', borderLeft: `4px solid ${color}` }}>
+                    <div className="stat-card-label" style={{ fontSize: '10px', color: '#7f8c8d', marginBottom: '4px' }}>{label}</div>
+                    <div className="stat-card-value" style={{ fontSize: '16px', fontWeight: 'bold', color }}>{val}</div>
                   </div>
                 ))}
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '10px' }}>
+                {loans.map(loan => {
+                  const payments = loanPayments.filter(p => p.loan_id === loan.id);
+                  const totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0);
+                  const currentBalance = (loan.initial_amount || loan.remaining_amount || 0) - totalPaid;
+                  const yi = currentBalance * (loan.final_rate || 0);
+                  return (
+                    <div key={loan.id} className="card" style={{ overflow: 'hidden', cursor: 'pointer' }} onClick={() => setDetailLoan(loan)}>
+                      <div style={{ background: '#2c3e50', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: '15px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>🏦 {loan.lender_name}</div>
+                        <button className="btn" onClick={(e) => { e.stopPropagation(); deleteItem('loans', loan.id); }} style={{ padding: '5px 8px', background: '#e74c3c', color: 'white', flexShrink: 0, marginLeft: '6px' }}>삭제</button>
+                      </div>
+                      <div style={{ padding: '14px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                          <div><div style={{ fontSize: '10px', color: '#7f8c8d', marginBottom: '2px' }}>현재 잔액</div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#c0392b' }}>{fUk(currentBalance)}</div></div>
+                          <div><div style={{ fontSize: '10px', color: '#7f8c8d', marginBottom: '2px' }}>금리</div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2c3e50' }}>{((loan.final_rate || 0) * 100).toFixed(2)}%</div></div>
+                        </div>
+                        <div style={{ background: '#fef9f0', border: '2px solid #f39c12', borderRadius: '8px', padding: '10px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>📊 이자 자동계산</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}><span style={{ fontSize: '11px', color: '#7f8c8d' }}>연 이자</span><strong style={{ color: '#e67e22', fontSize: '12px' }}>{fNum(yi)}원</strong></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: '11px', color: '#7f8c8d' }}>월 이자</span><strong style={{ color: '#e74c3c', fontSize: '14px' }}>{fNum(yi / 12)}원</strong></div>
+                        </div>
+                        {totalPaid > 0 && (
+                          <div style={{ marginTop: '8px', fontSize: '11px', color: '#27ae60', textAlign: 'center', background: '#e8f8f5', padding: '5px', borderRadius: '6px' }}>
+                            총 {fNum(totalPaid)}원 상환 ({payments.length}건)
+                          </div>
+                        )}
+                        <div style={{ marginTop: '8px', textAlign: 'center', fontSize: '11px', color: '#3498db', fontWeight: 'bold' }}>
+                          클릭하여 상세 관리 →
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 관리자 탭 - 간략화 */}
+          {!loading && activeTab === 'admins' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h2 style={{ fontSize: '22px', color: '#2c3e50', fontWeight: 'bold' }}>⚙️ 관리자</h2>
+                <button className="btn" onClick={() => openModal('admin')} style={{ padding: '9px 16px', background: '#8e44ad', color: 'white' }}>+ 추가</button>
+              </div>
+              <div className="card" style={{ padding: '12px' }}>
+                {admins.map((a, i) => (
+                  <div key={a.id} style={{ padding: '10px 0', borderBottom: i < admins.length - 1 ? '1px solid #f5f5f5' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '2px' }}>👤 {a.name}</div>
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '3px' }}>
+                        <span style={{ background: a.role === 'super' ? '#e74c3c' : '#3498db', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold' }}>{a.role === 'super' ? '최고관리자' : '관리자'}</span>
+                        <span style={{ background: a.active ? '#27ae60' : '#95a5a6', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold' }}>{a.active ? '활성' : '비활성'}</span>
+                      </div>
+                    </div>
+                    {a.id !== admin.id && <button className="btn" onClick={() => deleteItem('admins', a.id)} style={{ padding: '5px 8px', background: '#e74c3c', color: 'white', flexShrink: 0 }}>삭제</button>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 모바일 하단 네비 */}
+        <div id="mob-nav">
+          {tabs.map(({ id, icon, label }) => (
+            <button key={id} className={`mob-btn${activeTab === id ? ' active' : ''}`} onClick={() => setActiveTab(id)}>
+              <span>{icon}</span><span>{label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* 수납 모달 */}
+        {payTenant && <PaymentModal tenant={payTenant} payments={payments} onClose={() => setPayTenant(null)} onRefresh={loadPayments} />}
+
+        {/* 대출 상세 모달 */}
+        {detailLoan && <LoanDetailModal loan={detailLoan} loanPayments={loanPayments} onClose={() => setDetailLoan(null)} onRefresh={loadData} />}
+
+        {/* 등록/수정 모달 - 간략화 */}
+        {showModal && (
+          <div className="modal-wrap" onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '14px' }}>
+            <div className="modal-inner card" onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '460px', maxHeight: '85vh', overflowY: 'auto', padding: '20px', position: 'relative' }}>
+              <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '12px', right: '12px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', fontSize: '16px', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
+              <h3 style={{ fontSize: '17px', color: '#2c3e50', marginBottom: '16px' }}>{editItem ? '수정' : '등록'} - {{ tenant: '임차인', expense: '지출', loan: '대출', admin: '관리자' }[modalType]}</h3>
+              <form onSubmit={saveData}>
+                {modalType === 'tenant' && <>
+                  {[{ l: '호수', f: 'room', t: 'text' }, { l: '이름', f: 'name', t: 'text' }, { l: '연락처', f: 'contact', t: 'text' }, { l: '보증금', f: 'deposit', t: 'number' }, { l: '월세', f: 'monthly_rent', t: 'number' }, { l: '관리비', f: 'maintenance_fee', t: 'number' }, { l: '납입일', f: 'payment_day', t: 'number' }, { l: '입주일', f: 'move_in_date', t: 'date' }, { l: '만료일', f: 'contract_end', t: 'date' }].map(({ l, f, t }) => (
+                    <div key={f}><label style={lbl}>{l}</label><input type={t} value={formData[f] || ''} onChange={e => setFormData({ ...formData, [f]: t === 'number' ? (parseInt(e.target.value) || 0) : e.target.value })} style={inp} required /></div>
+                  ))}
+                </>}
+                {modalType === 'expense' && <>
+                  <label style={lbl}>날짜</label><input type="date" value={formData.date || ''} onChange={e => setFormData({ ...formData, date: e.target.value })} style={inp} required />
+                  <label style={lbl}>카테고리</label>
+                  <select value={formData.category_name || ''} onChange={e => setFormData({ ...formData, category_name: e.target.value })} style={inp} required>
+                    <option value="">선택</option>
+                    {expenseCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                  <label style={lbl}>금액</label><input type="number" value={formData.amount || ''} onChange={e => setFormData({ ...formData, amount: parseInt(e.target.value) || 0 })} style={inp} required />
+                  <label style={lbl}>설명</label><input value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} style={inp} />
+                </>}
+                {modalType === 'loan' && <>
+                  <label style={lbl}>대출처</label><input value={formData.lender_name || ''} onChange={e => setFormData({ ...formData, lender_name: e.target.value })} style={inp} required />
+                  <label style={lbl}>대출잔액</label><input type="number" value={formData.remaining_amount || ''} onChange={e => setFormData({ ...formData, remaining_amount: parseInt(e.target.value) || 0 })} style={inp} required />
+                  <label style={lbl}>금리 (%)</label><input type="number" step="0.01" value={formData.final_rate ? (formData.final_rate * 100).toFixed(2) : ''} onChange={e => setFormData({ ...formData, final_rate: parseFloat(e.target.value) / 100 || 0 })} style={inp} required />
+                </>}
+                {modalType === 'admin' && <>
+                  <label style={lbl}>이름</label><input value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} style={inp} required />
+                  <label style={lbl}>비밀번호</label><input type="number" value={formData.passcode || ''} onChange={e => setFormData({ ...formData, passcode: e.target.value })} style={inp} required />
+                  <label style={lbl}>권한</label>
+                  <select value={formData.role || 'admin'} onChange={e => setFormData({ ...formData, role: e.target.value })} style={inp}>
+                    <option value="super">최고관리자</option><option value="admin">관리자</option>
+                  </select>
+                </>}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button type="button" className="btn" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '11px', background: '#95a5a6', color: 'white' }}>취소</button>
+                  <button type="submit" className="btn" style={{ flex: 1, padding: '11px', background: '#27ae60', color: 'white' }}>{editItem ? '수정' : '등록'}</button>
+                </div>
+              </form>
             </div>
           </div>
         )}
       </div>
-
-      {/* 모바일 하단 네비 */}
-      <div id="mob-nav">
-        {tabs.map(({id,icon,label})=>(
-          <button key={id} className={`mob-btn${activeTab===id?' active':''}`} onClick={()=>setActiveTab(id)}>
-            <span>{icon}</span><span>{label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* 수납 관리 모달 */}
-      {payTenant && (
-        <PaymentModal
-          tenant={payTenant}
-          payments={payments}
-          onClose={()=>setPayTenant(null)}
-          onRefresh={loadPayments}
-        />
-      )}
-
-      {/* 등록/수정 모달 */}
-      {showModal&&(
-        <div className="modal-wrap" style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}
-          onClick={e=>{if(e.target===e.currentTarget)setShowModal(false);}}>
-          <div className="modal-inner card" style={{width:'100%',maxWidth:'500px',maxHeight:'88vh',overflowY:'auto',padding:'24px',position:'relative'}}
-            onClick={e=>e.stopPropagation()}>
-            <button onClick={()=>setShowModal(false)} style={{position:'absolute',top:'14px',right:'14px',background:'#e74c3c',color:'white',border:'none',borderRadius:'50%',width:'34px',height:'34px',fontSize:'20px',cursor:'pointer',fontWeight:'bold',lineHeight:1}}>×</button>
-            <h3 style={{fontSize:'19px',color:'#2c3e50',marginBottom:'18px'}}>{editItem?'수정':'새 등록'} - {{tenant:'임차인',expense:'지출',loan:'대출',admin:'관리자'}[modalType]}</h3>
-            <form onSubmit={saveData}>
-              {modalType==='tenant'&&<>
-                {[{l:'🏠 호수',f:'room',t:'text',p:'예: 301호'},{l:'👤 이름',f:'name',t:'text',p:'예: 김민수'},{l:'📞 연락처',f:'contact',t:'text',p:'예: 010-1234-5678'},{l:'💰 보증금 (원)',f:'deposit',t:'number',p:''},{l:'🏦 월세 (원)',f:'monthly_rent',t:'number',p:''},{l:'🔧 관리비 (원)',f:'maintenance_fee',t:'number',p:''},{l:'📅 납입일 (1~31)',f:'payment_day',t:'number',p:''},{l:'🚪 입주일',f:'move_in_date',t:'date',p:''},{l:'📋 계약만료일',f:'contract_end',t:'date',p:''}].map(({l,f,t,p})=>(
-                  <div key={f}><label style={s.label}>{l}</label><input type={t} placeholder={p} value={formData[f]||''} onChange={e=>setFormData({...formData,[f]:t==='number'?(parseInt(e.target.value)||0):e.target.value})} style={s.input} required/></div>
-                ))}
-              </>}
-              {modalType==='expense'&&<>
-                <label style={s.label}>📅 날짜</label><input type="date" value={formData.date||''} onChange={e=>setFormData({...formData,date:e.target.value})} style={s.input} required/>
-                <label style={s.label}>📂 카테고리</label>
-                <select value={formData.category_name||''} onChange={e=>setFormData({...formData,category_name:e.target.value})} style={s.input} required>
-                  <option value="">선택하세요</option>
-                  {expenseCategories.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
-                </select>
-                <label style={s.label}>💰 금액 (원)</label><input type="number" value={formData.amount||''} onChange={e=>setFormData({...formData,amount:parseInt(e.target.value)||0})} style={s.input} required/>
-                <label style={s.label}>📝 설명</label><input value={formData.description||''} onChange={e=>setFormData({...formData,description:e.target.value})} style={s.input}/>
-              </>}
-              {modalType==='loan'&&<>
-                <label style={s.label}>🏦 대출처</label><input placeholder="예: 수협은행" value={formData.lender_name||''} onChange={e=>setFormData({...formData,lender_name:e.target.value})} style={s.input} required/>
-                <label style={s.label}>💰 대출잔액 (원)</label><input type="number" value={formData.remaining_amount||''} onChange={e=>setFormData({...formData,remaining_amount:parseInt(e.target.value)||0})} style={{...s.input,borderColor:'#c0392b'}} required/>
-                <label style={s.label}>📊 금리 (%)</label><input type="number" step="0.01" min="0" max="100" placeholder="예: 2.45" value={formData.final_rate?(formData.final_rate*100).toFixed(2):''} onChange={e=>setFormData({...formData,final_rate:parseFloat(e.target.value)/100||0})} style={{...s.input,borderColor:'#e67e22'}} required/>
-                {formData.remaining_amount>0&&formData.final_rate>0&&(
-                  <div style={{background:'#fef9f0',border:'2px solid #f39c12',borderRadius:'10px',padding:'12px',marginBottom:'12px'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}><span style={{color:'#7f8c8d',fontSize:'13px'}}>연 이자</span><strong style={{color:'#e67e22'}}>{fNum(formData.remaining_amount*formData.final_rate)}원</strong></div>
-                    <div style={{display:'flex',justifyContent:'space-between'}}><span style={{color:'#7f8c8d',fontSize:'13px'}}>월 이자</span><strong style={{color:'#e74c3c',fontSize:'16px'}}>{fNum(formData.remaining_amount*formData.final_rate/12)}원</strong></div>
-                  </div>
-                )}
-                <label style={s.label}>🏷️ 유형</label>
-                <select value={formData.loan_type||'bank'} onChange={e=>setFormData({...formData,loan_type:e.target.value})} style={s.input}>
-                  <option value="bank">은행 대출</option><option value="personal">개인 차입</option><option value="other">기타</option>
-                </select>
-                <label style={s.label}>📅 시작일</label><input type="date" value={formData.start_date||''} onChange={e=>setFormData({...formData,start_date:e.target.value})} style={s.input}/>
-                <label style={s.label}>📝 메모</label><input value={formData.note||''} onChange={e=>setFormData({...formData,note:e.target.value})} style={s.input}/>
-              </>}
-              {modalType==='admin'&&<>
-                <label style={s.label}>👤 이름</label><input placeholder="예: 김철수" value={formData.name||''} onChange={e=>setFormData({...formData,name:e.target.value})} style={s.input} required/>
-                <label style={s.label}>🔑 비밀번호 (숫자)</label><input type="number" placeholder="예: 5678" value={formData.passcode||''} onChange={e=>setFormData({...formData,passcode:e.target.value})} style={s.input} required/>
-                <label style={s.label}>권한</label>
-                <select value={formData.role||'admin'} onChange={e=>setFormData({...formData,role:e.target.value})} style={s.input}>
-                  <option value="super">최고관리자</option><option value="admin">관리자</option>
-                </select>
-                <label style={s.label}>상태</label>
-                <select value={formData.active?'true':'false'} onChange={e=>setFormData({...formData,active:e.target.value==='true'})} style={s.input}>
-                  <option value="true">활성</option><option value="false">비활성</option>
-                </select>
-              </>}
-              <div style={{display:'flex',gap:'10px',marginTop:'14px'}}>
-                <button type="button" className="btn" onClick={()=>setShowModal(false)} style={{flex:1,padding:'13px',background:'#95a5a6',color:'white',fontSize:'15px'}}>취소</button>
-                <button type="submit" className="btn" style={{flex:1,padding:'13px',background:'#27ae60',color:'white',fontSize:'15px'}}>{editItem?'수정':'등록'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
-}
 
-ReactDOM.render(<App/>, document.getElementById('root'));
-</script>
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+  </script>
 </body>
 </html>
