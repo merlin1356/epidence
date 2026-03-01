@@ -547,7 +547,137 @@ export default function App() {
     const year = new Date(selectedMonth).getFullYear();
     const workbook = XLSX.utils.book_new();
 
-    // 1. 임차인 시트
+    // === 1. 매출 시트 (업로드된 양식 그대로) ===
+    const salesData = [];
+    
+    // Row 1: 빈 행
+    salesData.push([]);
+    
+    // Row 2: 건물명
+    salesData.push(['', 'EPIDENCE 올인스페이스']);
+    
+    // Row 3: 호실명 헤더
+    const row3 = ['', '', '', '구분'];
+    const sortedTenants = [...tenants].sort((a, b) => a.room.localeCompare(b.room));
+    sortedTenants.forEach(t => {
+      row3.push('', '');  // 빈 칸 2개
+      row3.push(`${t.room}-${t.name}`);  // 호실명
+    });
+    salesData.push(row3);
+    
+    // Row 4: 보증금
+    const row4 = ['', '보증금', '=SUM(D4:' + getColumnLetter(4 + sortedTenants.length * 3 - 1) + '4)'];
+    sortedTenants.forEach(t => {
+      row4.push(t.deposit);
+      row4.push('', '');  // 빈 칸 2개
+    });
+    salesData.push(row4);
+    
+    // Row 5: 월세/관리비/기타 헤더
+    const row5 = ['', '', '소계'];
+    sortedTenants.forEach(() => {
+      row5.push('월세', '관리비', '기타');
+    });
+    salesData.push(row5);
+    
+    // Row 6~17: 월별 데이터 (12개월)
+    for (let i = 1; i <= 12; i++) {
+      const month = String(i).padStart(2, '0');
+      const ym = `${year}-${month}`;
+      const date = new Date(year, i - 1, 1);
+      const monthPays = payments.filter(p => p.year_month === ym);
+      
+      const lastCol = getColumnLetter(4 + sortedTenants.length * 3 - 1);
+      const row = ['', date, `=SUM(D${5 + i}:${lastCol}${5 + i})`];
+      
+      sortedTenants.forEach(t => {
+        const rentPay = monthPays.find(p => p.tenant_id === t.id && p.type === 'rent');
+        const feePay = monthPays.find(p => p.tenant_id === t.id && p.type === 'fee');
+        const otherPays = monthPays.filter(p => p.tenant_id === t.id && p.type === 'other');
+        
+        row.push(
+          rentPay ? rentPay.amount : '',
+          feePay ? feePay.amount : '',
+          otherPays.length > 0 ? otherPays.reduce((s, p) => s + p.amount, 0) : ''
+        );
+      });
+      
+      salesData.push(row);
+    }
+    
+    const salesSheet = XLSX.utils.aoa_to_sheet(salesData);
+    XLSX.utils.book_append_sheet(workbook, salesSheet, '매출');
+
+    // === 2. 매입 시트 (업로드된 양식 그대로) ===
+    const expenseData = [];
+    
+    // Row 1: 빈 행
+    expenseData.push([]);
+    
+    // Row 2: 카테고리 헤더
+    const categories = ['김평기 원금상환', '김평기 이자', '수협은행 이자', '카드값', '청소비', 
+                       '엘리베이터 유지관리', '화재보험', '전기료', '수도', '통신비', '세무비용', '기타'];
+    const expRow2 = ['', '', '소 계', ...categories];
+    expenseData.push(expRow2);
+    
+    // Row 3~14: 월별 데이터 (12개월)
+    for (let i = 1; i <= 12; i++) {
+      const month = String(i).padStart(2, '0');
+      const ym = `${year}-${month}`;
+      const date = new Date(year, i - 1, 1);
+      const monthExp = expenses.filter(e => e.date?.startsWith(ym));
+      
+      const row = ['', date, `=SUM(D${2 + i}:O${2 + i})`];
+      
+      // 각 카테고리별 금액 (D2 헤더를 찾아서 매핑)
+      categories.forEach(cat => {
+        const catExp = monthExp.filter(e => e.category_name === cat);
+        const total = catExp.reduce((s, e) => s + (e.amount || 0), 0);
+        row.push(total || '');
+      });
+      
+      expenseData.push(row);
+    }
+    
+    const expenseSheet = XLSX.utils.aoa_to_sheet(expenseData);
+    XLSX.utils.book_append_sheet(workbook, expenseSheet, '매입');
+
+    // === 3. 종합 시트 (업로드된 양식 그대로) ===
+    const summaryData = [];
+    
+    // Row 1-3: 빈 행
+    summaryData.push([], [], []);
+    
+    // Row 4: 헤더
+    summaryData.push(['', '', '순익', '매출', '매입', '대출액', '수익률', '', '', '자본금', 600000000]);
+    
+    // Row 5~16: 월별 데이터
+    for (let i = 1; i <= 12; i++) {
+      const month = String(i).padStart(2, '0');
+      const ym = `${year}-${month}`;
+      const date = new Date(year, i - 1, 1);
+      
+      const row = [
+        '',
+        date,
+        `=D${4 + i}-E${4 + i}`,  // 순익 = 매출 - 매입
+        `=매출!C${5 + i}`,        // 매출 시트 참조
+        `=매입!C${2 + i}`,        // 매입 시트 참조
+        i === 1 ? totalLoan : '',  // 대출액은 첫 달만
+        `=C${4 + i}/K4`,          // 수익률
+        '',
+        '',
+        i === 1 ? '지분' : '',
+        i === 1 ? 200000000 : ''
+      ];
+      
+      summaryData.push(row);
+    }
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, '종합');
+
+    // === 4. 임차인 목록 (참고용) ===
     const tenantsData = tenants.map(t => ({
       '호수': t.room,
       '이름': t.name,
@@ -560,44 +690,9 @@ export default function App() {
       '계약만료일': t.contract_end
     }));
     const tenantsSheet = XLSX.utils.json_to_sheet(tenantsData);
-    XLSX.utils.book_append_sheet(workbook, tenantsSheet, '임차인');
+    XLSX.utils.book_append_sheet(workbook, tenantsSheet, '임차인목록');
 
-    // 2. 수납내역 시트 (월별)
-    const paymentsData = [];
-    for (let i = 1; i <= 12; i++) {
-      const month = String(i).padStart(2, '0');
-      const ym = `${year}-${month}`;
-      const monthPays = payments.filter(p => p.year_month === ym);
-      monthPays.forEach(p => {
-        const tenant = tenants.find(t => t.id === p.tenant_id);
-        paymentsData.push({
-          '월': `${i}월`,
-          '호수': tenant?.room || '',
-          '이름': tenant?.name || '',
-          '유형': p.type === 'rent' ? '월세' : p.type === 'fee' ? '관리비' : '기타',
-          '금액': p.amount,
-          '메모': p.note || '',
-          '수납일': p.paid_at?.split('T')[0] || ''
-        });
-      });
-    }
-    const paymentsSheet = XLSX.utils.json_to_sheet(paymentsData);
-    XLSX.utils.book_append_sheet(workbook, paymentsSheet, '수납내역');
-
-    // 3. 지출내역 시트 (월별)
-    const expensesData = expenses
-      .filter(e => e.date?.startsWith(year.toString()))
-      .map(e => ({
-        '월': `${new Date(e.date).getMonth() + 1}월`,
-        '날짜': e.date,
-        '카테고리': e.category_name,
-        '금액': e.amount,
-        '설명': e.description || ''
-      }));
-    const expensesSheet = XLSX.utils.json_to_sheet(expensesData);
-    XLSX.utils.book_append_sheet(workbook, expensesSheet, '지출내역');
-
-    // 4. 대출내역 시트
+    // === 5. 대출 (참고용) ===
     const loansData = loans.map(l => {
       const lp = loanPayments.filter(p => p.loan_id === l.id);
       const totalPaid = lp.reduce((s, p) => s + (p.amount || 0), 0);
@@ -613,61 +708,23 @@ export default function App() {
       };
     });
     const loansSheet = XLSX.utils.json_to_sheet(loansData);
-    XLSX.utils.book_append_sheet(workbook, loansSheet, '대출내역');
+    XLSX.utils.book_append_sheet(workbook, loansSheet, '대출');
 
-    // 5. 대출 상환내역 시트
-    const loanPaymentsData = loanPayments
-      .filter(lp => {
-        const loan = loans.find(l => l.id === lp.loan_id);
-        return loan && lp.payment_date?.startsWith(year.toString());
-      })
-      .map(lp => {
-        const loan = loans.find(l => l.id === lp.loan_id);
-        return {
-          '월': `${new Date(lp.payment_date).getMonth() + 1}월`,
-          '대출처': loan?.lender_name || '',
-          '상환일': lp.payment_date,
-          '상환액': lp.amount,
-          '메모': lp.note || ''
-        };
-      });
-    const loanPaymentsSheet = XLSX.utils.json_to_sheet(loanPaymentsData);
-    XLSX.utils.book_append_sheet(workbook, loanPaymentsSheet, '대출상환내역');
+    // 파일명 및 다운로드
+    const fileName = `올인스페이스_회계자료_${year}년.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
-    // 6. 월별요약 시트
-    const summaryData = [];
-    let yearRevenue = 0, yearExpense = 0;
-    for (let i = 1; i <= 12; i++) {
-      const month = String(i).padStart(2, '0');
-      const ym = `${year}-${month}`;
-      const monthPays = payments.filter(p => p.year_month === ym);
-      const monthExp = expenses.filter(e => e.date?.startsWith(ym));
-      const revenue = monthPays.reduce((s, p) => s + (p.amount || 0), 0);
-      const expense = monthExp.reduce((s, e) => s + (e.amount || 0), 0);
-      const netProfit = revenue - expense;
-      yearRevenue += revenue;
-      yearExpense += expense;
-      summaryData.push({
-        '월': `${i}월`,
-        '수익': revenue,
-        '지출': expense,
-        '순익': netProfit,
-        '월세수납': monthPays.filter(p => p.type === 'rent').reduce((s, p) => s + p.amount, 0),
-        '관리비수납': monthPays.filter(p => p.type === 'fee').reduce((s, p) => s + p.amount, 0),
-        '기타수납': monthPays.filter(p => p.type === 'other').reduce((s, p) => s + p.amount, 0)
-      });
+  // 엑셀 열 문자 변환 헬퍼 함수
+  const getColumnLetter = (col) => {
+    let letter = '';
+    while (col > 0) {
+      const mod = (col - 1) % 26;
+      letter = String.fromCharCode(65 + mod) + letter;
+      col = Math.floor((col - 1) / 26);
     }
-    summaryData.push({
-      '월': '합계',
-      '수익': yearRevenue,
-      '지출': yearExpense,
-      '순익': yearRevenue - yearExpense,
-      '월세수납': summaryData.reduce((s, d) => s + (d['월세수납'] || 0), 0),
-      '관리비수납': summaryData.reduce((s, d) => s + (d['관리비수납'] || 0), 0),
-      '기타수납': summaryData.reduce((s, d) => s + (d['기타수납'] || 0), 0)
-    });
-    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(workbook, summarySheet, '월별요약');
+    return letter;
+  };
 
     // 파일 다운로드
     XLSX.writeFile(workbook, `올인스페이스_${year}년_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -1260,6 +1317,7 @@ export default function App() {
       </div>
     </>
   );
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
